@@ -1,32 +1,107 @@
 @import "tailwindcss";
 
+@theme {
+  /* blues */
+  --color-periwinkle-50: #f3f6fd;
+  --color-periwinkle-100: #e5edfb;
+  --color-periwinkle-200: #cbdcf6;
+  --color-periwinkle-300: #a5c2ec;
+  --color-periwinkle-400: #79a2de;
+  --color-periwinkle-500: #5482cd;
+  --color-periwinkle-600: #3f66ae;
+  --color-periwinkle-700: #34528c;
+  --color-periwinkle-800: #2d4470;
+  --color-periwinkle-900: #263a5c;
+
+  /* lavenders */
+  --color-lavender-50: #f8f6fd;
+  --color-lavender-100: #f0ebfb;
+  --color-lavender-200: #e1d7f7;
+  --color-lavender-300: #cab8ef;
+  --color-lavender-400: #ae94e4;
+  --color-lavender-500: #9273d6;
+  --color-lavender-600: #7a58c0;
+  --color-lavender-700: #66489f;
+  --color-lavender-800: #553d82;
+  --color-lavender-900: #47346a;
+
+  /* the colors actually used in components */
+  --color-background: #fbfaff;
+  --color-surface: #ffffff;
+  --color-sunken: #f4f2fc;
+  --color-ink: #262146;
+  --color-ink-soft: #4c4671;
+  --color-muted: #736d95;
+  --color-line: #e6e1f5;
+  --color-primary: #5b62b8;
+  --color-primary-hover: #494f9c;
+
+  /* fonts */
+  --font-display: var(--font-cormorant), Georgia, serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  --ease-gentle: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* no dark mode since these pale colors look bad inverted */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
 
-  --color-apricot: #f8703a;
-  --color-brown: #200b09;
-  --color-terracotta: #9a4534;
-  --color-copper: #9e543a;
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
 
-}
+  /* so the sticky header doesn't cover a section when you jump to it */
+  [id] {
+    scroll-margin-top: 6rem;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  ::selection {
+    background-color: var(--color-lavender-200);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  /* soft background glow used on the hero and the contact section */
+  .wash {
+    background:
+      radial-gradient(
+        60rem 40rem at 12% -10%,
+        var(--color-lavender-100) 0%,
+        transparent 60%
+      ),
+      radial-gradient(
+        50rem 36rem at 92% 8%,
+        var(--color-periwinkle-100) 0%,
+        transparent 62%
+      ),
+      var(--color-background);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
