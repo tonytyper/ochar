@@ -1,39 +1,60 @@
-import { getSupabase } from "@/lib/supabase";
+import "server-only";
+import { cache } from "react";
+import { getSupabase, resolveImage } from "@/lib/supabase";
 
-// the two colors that a bar's artwork fades between
+// the paper label drawn for a bar with no photo: a colored ground, and the ink
+// the label is printed in
 export interface Tone {
-  from: string;
-  to: string;
+  ground: string;
+  ink: string;
 }
 
 export interface Product {
   id: string;
   slug: string;
+  // position in the catalogue, printed on labels as "No. 01"
+  number: number;
   name: string;
-  tagline: string;
-  description: string;
+  summary: string;
+  ingredients: string[];
   price: number;
-  notes: string[];
-  ingredients: string;
-  image_url: string | null;
+  image: string | null;
+  gallery: string[];
   in_stock: boolean;
   tone: Tone;
 }
 
-// a row as it comes back from supabase. only the first seven columns are
-// required and the rest are used if the table has them
+export const TONES = {
+  lavender: { ground: "#d6cde3", ink: "#4b3d66" },
+  sea: { ground: "#c7d6d6", ink: "#2d4f53" },
+  orris: { ground: "#e0cbd0", ink: "#6a3446" },
+  chamomile: { ground: "#cbd5e0", ink: "#33476a" },
+  apricot: { ground: "#ecdac8", ink: "#7a4630" },
+  sage: { ground: "#cfd4bc", ink: "#47522f" },
+  oat: { ground: "#e7dfd0", ink: "#5a4b3d" },
+  fir: { ground: "#bfcab8", ink: "#2f4636" },
+  rose: { ground: "#e6cbc5", ink: "#74343a" },
+  clay: { ground: "#dcc4ae", ink: "#6b3f26" },
+} satisfies Record<string, Tone>;
+
+export type ToneName = keyof typeof TONES;
+const TONE_ORDER = Object.keys(TONES) as ToneName[];
+
+// a row from the supabase products table. see supabase/schema.sql. only name
+// and price are really required, everything else has a fallback
 interface ProductRow {
-  id: string;
+  id: string | number;
   name: string;
-  description: string | null;
-  price: number | null;
-  image_url: string | null;
-  in_stock: boolean | null;
-  created_at: string;
+  price: number | string | null;
   slug?: string | null;
-  tagline?: string | null;
-  notes?: string[] | null;
-  ingredients?: string | null;
+  description?: string | null;
+  ingredients?: string[] | string | null;
+  image_url?: string | null;
+  gallery?: string[] | null;
+  in_stock?: boolean | null;
+  tone?: string | null;
+  sort_order?: number | null;
+  created_at?: string | null;
 }
 
 export function slugify(name: string) {
@@ -44,50 +65,77 @@ export function slugify(name: string) {
     .replace(/^-|-$/g, "");
 }
 
-export function formatPrice(price: number) {
-  return "$" + price.toFixed(price % 1 === 0 ? 0 : 2);
+// ingredients can be a postgres array or one comma separated string
+function toList(value: ProductRow["ingredients"]) {
+  if (!value) return [];
+  const list = Array.isArray(value) ? value : value.split(/[,\n]/);
+  return list.map((item) => item.trim()).filter(Boolean);
 }
 
-// turns a supabase row into a Product, filling in anything the table doesn't
-// have, bars are given a tone in order so the artwork stays varied
 function fromRow(row: ProductRow, index: number): Product {
+  const tone =
+    row.tone && row.tone in TONES
+      ? TONES[row.tone as ToneName]
+      : TONES[TONE_ORDER[index % TONE_ORDER.length]];
+
   return {
     id: String(row.id),
     slug: row.slug || slugify(row.name),
+    number: index + 1,
     name: row.name,
-    tagline: row.tagline || "",
-    description: row.description || "",
+    summary: row.description || "",
+    ingredients: toList(row.ingredients),
     price: Number(row.price || 0),
-    notes: row.notes || [],
-    ingredients: row.ingredients || "",
-    image_url: row.image_url,
+    image: resolveImage(row.image_url),
+    gallery: (row.gallery || [])
+      .map((path) => resolveImage(path))
+      .filter((path): path is string => Boolean(path)),
     in_stock: row.in_stock ?? true,
-    tone: TONES[index % TONES.length],
+    tone,
   };
 }
 
-// every product in the shop! uses supabase when it's set up, and the
-// catalogue below when it isn't. anything going wrong falls back to the
-// catalogue too, so the shop always has something to sell
-export async function getProducts(): Promise<Product[]> {
+function byShopOrder(a: ProductRow, b: ProductRow) {
+  const order = (a.sort_order ?? 0) - (b.sort_order ?? 0);
+  if (order !== 0) return order;
+  return String(a.created_at ?? "").localeCompare(String(b.created_at ?? ""));
+}
+
+// postgres / postgrest codes for "there is no products table"
+const NO_TABLE = ["42P01", "PGRST205"];
+
+// every product in the shop. uses the supabase products table when there is
+// one, and the catalogue at the bottom of this file when there isn't (no env
+// vars, no table, or an empty table). cached per request so a page and its
+// metadata share one query
+export const getProducts = cache(async (): Promise<Product[]> => {
   const supabase = getSupabase();
 
   if (!supabase) {
     return CATALOGUE;
   }
 
-  try {
-    const { data, error } = await supabase.from("products").select("*");
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .abortSignal(AbortSignal.timeout(8000));
 
-    if (error || !data || data.length === 0) {
-      return CATALOGUE;
+  if (error && !NO_TABLE.includes(error.code)) {
+    // in production this throws rather than quietly swapping in the stand-in
+    // catalogue: a page keeps its last good version, and checkout refuses
+    // instead of charging made-up prices
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(`products query failed: ${error.message}`);
     }
-
-    return data.map(fromRow);
-  } catch {
+    console.warn(`products query failed, using the catalogue: ${error.message}`);
     return CATALOGUE;
   }
-}
+  if (!data || data.length === 0) {
+    return CATALOGUE;
+  }
+
+  return (data as ProductRow[]).sort(byShopOrder).map(fromRow);
+});
 
 export async function getProduct(slug: string) {
   const products = await getProducts();
@@ -99,137 +147,149 @@ export async function getFeaturedProducts(limit = 3) {
   return products.filter((product) => product.in_stock).slice(0, limit);
 }
 
-const TONES: Tone[] = [
-  { from: "#cab8ef", to: "#f0ebfb" },
-  { from: "#a5c2ec", to: "#e5edfb" },
-  { from: "#ae94e4", to: "#e1d7f7" },
-  { from: "#9db8e8", to: "#eef3fd" },
-  { from: "#bcc6f2", to: "#f2f0fd" },
-  { from: "#8f9fdd", to: "#e8ecfa" },
-  { from: "#c3b3ea", to: "#f5f1fd" },
-  { from: "#93b5e4", to: "#e9f1fc" },
-];
+// a few other bars to show under a product, starting after it in the
+// catalogue so each page suggests something different
+export async function getOtherProducts(slug: string, limit = 3) {
+  const products = await getProducts();
+  const at = products.findIndex((product) => product.slug === slug);
+  const rest = [...products.slice(at + 1), ...products.slice(0, at)];
+  return rest.filter((product) => product.in_stock).slice(0, limit);
+}
 
-//dummy catalogue
-const CATALOGUE: Product[] = [
+// stand-in catalogue. scent names, copy, ingredients and prices are all
+// invented and get replaced by the products table once supabase is set up
+const CATALOGUE_ROWS: (ProductRow & { tone: ToneName })[] = [
   {
     id: "lavender-field",
-    slug: "lavender-field",
     name: "Lavender Field",
-    tagline: "The one that started it all.",
     description:
-      "Whole lavender buds steeped in oat milk, poured slow and cured for six weeks. It lathers soft and leaves the kind of quiet scent you only notice again an hour later.",
+      "Lavender buds steeped in oat milk. A soft lather and a calm scent that stays with you.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Shea butter",
+      "Oat milk",
+      "Lavender essential oil",
+      "Lavender buds",
+      "White kaolin clay",
+    ],
     price: 12,
-    notes: ["Lavender", "Oat milk", "Cedar"],
-    ingredients:
-      "Saponified olive, coconut and shea butter oils, oat milk, lavender essential oil, whole lavender buds, kaolin clay.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[0],
+    tone: "lavender",
   },
   {
     id: "sea-mist",
-    slug: "sea-mist",
     name: "Sea Mist",
-    tagline: "Cold water, clean air.",
     description:
-      "Blue kaolin clay and a pinch of sea salt make a dense, mineral bar that rinses completely clean. Bracing without being sharp.",
+      "Blue clay and a pinch of sea salt. A dense, mineral bar that rinses completely clean.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Castor oil",
+      "Blue kaolin clay",
+      "Sea salt",
+      "Bergamot essential oil",
+      "Petitgrain essential oil",
+    ],
     price: 12,
-    notes: ["Sea salt", "Blue clay", "Bergamot"],
-    ingredients:
-      "Saponified olive, coconut and castor oils, blue kaolin clay, sea salt, bergamot and petitgrain essential oils.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[1],
+    tone: "sea",
   },
   {
     id: "wild-iris",
-    slug: "wild-iris",
     name: "Wild Iris",
-    tagline: "Powdery, green, a little old-fashioned.",
     description:
-      "Orris root gives this bar its soft powdery finish, cut with violet leaf so it stays green rather than sweet. Our most-requested gift bar.",
+      "Orris root and violet leaf. Powdery and green, old-fashioned in the best way.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Avocado oil",
+      "Orris root powder",
+      "Violet leaf absolute",
+      "Vetiver essential oil",
+    ],
     price: 13,
-    notes: ["Orris root", "Violet leaf", "Vetiver"],
-    ingredients:
-      "Saponified olive, coconut and avocado oils, orris root powder, violet leaf absolute, vetiver essential oil.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[2],
+    tone: "orris",
   },
   {
     id: "blue-chamomile",
-    slug: "blue-chamomile",
     name: "Blue Chamomile",
-    tagline: "For skin that argues back.",
     description:
-      "German chamomile turns this bar its natural dusk blue, with no colourant at all. Unfussy, low-scent and gentle enough to use on your face.",
+      "Chamomile, calendula and raw honey. Barely scented, and gentle enough for your face.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Shea butter",
+      "German chamomile essential oil",
+      "Calendula petals",
+      "Raw honey",
+    ],
     price: 14,
-    notes: ["Chamomile", "Calendula", "Honey"],
-    ingredients:
-      "Saponified olive, coconut and shea butter oils, German chamomile essential oil, calendula petals, raw honey.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[3],
+    tone: "chamomile",
   },
   {
     id: "moonflower",
-    slug: "moonflower",
     name: "Moonflower",
-    tagline: "A night-blooming bar.",
     description:
-      "Jasmine and tuberose over a base of coconut milk. Rich, floral and deliberately a little indulgent - this is the one for a long bath.",
+      "Jasmine and tuberose over coconut milk. Rich and floral, made for a long bath.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Cocoa butter",
+      "Coconut milk",
+      "Jasmine absolute",
+      "Tuberose absolute",
+      "Alkanet root",
+    ],
     price: 14,
-    notes: ["Jasmine", "Tuberose", "Coconut milk"],
-    ingredients:
-      "Saponified olive, coconut and cocoa butter oils, coconut milk, jasmine and tuberose absolutes, alkanet root.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[4],
+    tone: "apricot",
   },
   {
     id: "rosemary-and-rain",
-    slug: "rosemary-and-rain",
     name: "Rosemary & Rain",
-    tagline: "The morning bar.",
     description:
-      "Rosemary, spearmint and a thread of eucalyptus. Wakes you up without the sting of a proper peppermint bar.",
+      "Rosemary, spearmint and a thread of eucalyptus. The one for early mornings.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Castor oil",
+      "Rosemary essential oil",
+      "Spearmint essential oil",
+      "Eucalyptus essential oil",
+      "French green clay",
+    ],
     price: 11,
-    notes: ["Rosemary", "Spearmint", "Eucalyptus"],
-    ingredients:
-      "Saponified olive, coconut and castor oils, rosemary, spearmint and eucalyptus essential oils, French green clay.",
-    image_url: null,
     in_stock: false,
-    tone: TONES[5],
+    tone: "sage",
   },
   {
     id: "linen",
-    slug: "linen",
     name: "Linen",
-    tagline: "Barely scented, on purpose.",
     description:
-      "The unscented bar, for sensitive skin and for anyone who would rather not smell like anything at all. Just oats, clay and a long cure.",
+      "Unscented, for sensitive skin. Just oats, white clay and a long, slow cure.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Shea butter",
+      "Colloidal oatmeal",
+      "White kaolin clay",
+    ],
     price: 11,
-    notes: ["Unscented", "Colloidal oat", "Kaolin"],
-    ingredients:
-      "Saponified olive, coconut and shea butter oils, colloidal oatmeal, white kaolin clay.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[6],
+    tone: "oat",
   },
   {
     id: "first-frost",
-    slug: "first-frost",
     name: "First Frost",
-    tagline: "Winter seasonal.",
     description:
-      "Fir needle and juniper with a cold snap of grapefruit peel. Made in small runs from November, and gone by spring.",
+      "Fir needle, juniper and grapefruit peel. A winter bar, made in small runs until spring.",
+    ingredients: [
+      "Olive oil",
+      "Coconut oil",
+      "Fir needle essential oil",
+      "Juniper berry essential oil",
+      "Grapefruit essential oil",
+    ],
     price: 13,
-    notes: ["Fir needle", "Juniper", "Grapefruit"],
-    ingredients:
-      "Saponified olive and coconut oils, fir needle, juniper berry and grapefruit essential oils.",
-    image_url: null,
-    in_stock: true,
-    tone: TONES[7],
+    tone: "fir",
   },
 ];
+
+export const CATALOGUE: Product[] = CATALOGUE_ROWS.map(fromRow);
