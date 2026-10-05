@@ -1,99 +1,311 @@
 @import "tailwindcss";
 
 @theme {
-  /* blues */
-  --color-periwinkle-50: #f3f6fd;
-  --color-periwinkle-100: #e5edfb;
-  --color-periwinkle-200: #cbdcf6;
-  --color-periwinkle-300: #a5c2ec;
-  --color-periwinkle-400: #79a2de;
-  --color-periwinkle-500: #5482cd;
-  --color-periwinkle-600: #3f66ae;
-  --color-periwinkle-700: #34528c;
-  --color-periwinkle-800: #2d4470;
-  --color-periwinkle-900: #263a5c;
+  /* only our own colors exist, so stray tailwind defaults can't creep in */
+  --color-*: initial;
 
-  /* lavenders */
-  --color-lavender-50: #f8f6fd;
-  --color-lavender-100: #f0ebfb;
-  --color-lavender-200: #e1d7f7;
-  --color-lavender-300: #cab8ef;
-  --color-lavender-400: #ae94e4;
-  --color-lavender-500: #9273d6;
-  --color-lavender-600: #7a58c0;
-  --color-lavender-700: #66489f;
-  --color-lavender-800: #553d82;
-  --color-lavender-900: #47346a;
+  /* warm paper neutrals, light to dark */
+  --color-parchment-50: #fbf8f2;
+  --color-parchment-100: #f6f0e6;
+  --color-parchment-200: #ede4d5;
+  --color-parchment-300: #e0d3bf;
+  --color-parchment-400: #cbb9a0;
+  --color-parchment-500: #a8937a;
+  --color-parchment-600: #8a7563;
+  --color-parchment-700: #6f5d53;
+  --color-parchment-800: #4e3e37;
+  --color-parchment-900: #2b1f1b;
 
-  /* the colors actually used in components */
-  --color-background: #fbfaff;
-  --color-surface: #ffffff;
-  --color-sunken: #f4f2fc;
-  --color-ink: #262146;
-  --color-ink-soft: #4c4671;
-  --color-muted: #736d95;
-  --color-line: #e6e1f5;
-  --color-primary: #5b62b8;
-  --color-primary-hover: #494f9c;
+  /* the brand red */
+  --color-pomegranate-50: #f9eeee;
+  --color-pomegranate-100: #f1dadb;
+  --color-pomegranate-200: #e3b4b7;
+  --color-pomegranate-300: #cf878d;
+  --color-pomegranate-400: #b55b65;
+  --color-pomegranate-500: #9a3b47;
+  --color-pomegranate-600: #87303c;
+  --color-pomegranate-700: #7a2834;
+  --color-pomegranate-800: #611f2a;
+  --color-pomegranate-900: #45161e;
 
-  /* fonts */
-  --font-display: var(--font-cormorant), Georgia, serif;
-  --font-sans: var(--font-nunito), system-ui, sans-serif;
+  /* warm accent, for ornaments and small highlights only */
+  --color-apricot-100: #f6e4d0;
+  --color-apricot-200: #edc9a4;
+  --color-apricot-300: #e0a873;
+  --color-apricot-400: #d08b4f;
+  --color-apricot-500: #b8692c;
+
+  /* green, used sparingly */
+  --color-olive-100: #e7e8d8;
+  --color-olive-300: #b5b98f;
+  --color-olive-500: #767c4c;
+  --color-olive-600: #5c6338;
+  --color-olive-700: #474d2b;
+
+  /* the colors components should use */
+  --color-background: var(--color-parchment-100);
+  --color-surface: var(--color-parchment-50);
+  --color-sunken: var(--color-parchment-200);
+  --color-line: var(--color-parchment-300);
+  --color-line-strong: var(--color-parchment-400);
+  --color-ink: var(--color-parchment-900);
+  --color-ink-soft: var(--color-parchment-800);
+  --color-muted: var(--color-parchment-700);
+  --color-primary: var(--color-pomegranate-700);
+  --color-primary-hover: var(--color-pomegranate-800);
+  --color-primary-soft: var(--color-pomegranate-100);
+  --color-accent: var(--color-apricot-400);
+  --color-leaf: var(--color-olive-600);
+  --color-night: #2a1b1f;
+  --color-on-night: #efe5d6;
+  --color-on-night-muted: #b9a99b;
+
+  /* fondamento is the face on the boxes, garamond does the reading */
+  --font-display: var(--font-fondamento), "Iowan Old Style", Georgia, serif;
+  --font-serif: var(--font-garamond), "Iowan Old Style", Georgia, serif;
+  --font-armenian: var(--font-noto-armenian), "Sylfaen", serif;
+  --default-font-family: var(--font-serif);
+
+  --text-hero: clamp(2.9rem, 2rem + 4.2vw, 5.6rem);
+  --text-hero--line-height: 1;
+  --text-title: clamp(2.4rem, 1.8rem + 2.6vw, 4rem);
+  --text-title--line-height: 1.05;
+  --text-section: clamp(2rem, 1.6rem + 1.6vw, 2.9rem);
+  --text-section--line-height: 1.1;
+  --text-label: 0.78rem;
+  --text-label--line-height: 1.4;
+  --text-label--letter-spacing: 0.16em;
+
+  /* every product photo is landscape. change this if yours are 3:2 */
+  --aspect-photo: 4 / 3;
 
   --ease-gentle: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --animate-rise: rise 900ms var(--ease-gentle) both;
+
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 }
 
-/* no dark mode since these pale colors look bad inverted */
+/* no dark mode: the warm paper colors don't survive being inverted */
 :root {
   color-scheme: light;
+  /* the page background: parchment with a faint grain */
+  --paper: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .27 0 0 0 0 .19 0 0 0 0 .14 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E") var(--color-background);
 }
 
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
-    background-color: var(--color-background);
+    background: var(--paper);
     color: var(--color-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-serif);
+    font-size: 1.125rem;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 
   h1,
   h2,
-  h3 {
+  h3,
+  h4 {
     font-family: var(--font-display);
     font-weight: 400;
-    letter-spacing: -0.01em;
+    text-wrap: balance;
   }
 
-  /* so the sticky header doesn't cover a section when you jump to it */
+  p {
+    text-wrap: pretty;
+  }
+
+  /* so the sticky header doesn't cover a section you jump to */
   [id] {
-    scroll-margin-top: 6rem;
+    scroll-margin-top: 7rem;
   }
 
   ::selection {
-    background-color: var(--color-lavender-200);
+    background-color: var(--color-pomegranate-100);
+    color: var(--color-ink);
   }
 
   :focus-visible {
     outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+    outline-offset: 3px;
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
   }
 }
 
 @layer components {
-  /* soft background glow used on the hero and the contact section */
-  .wash {
-    background:
-      radial-gradient(
-        60rem 40rem at 12% -10%,
-        var(--color-lavender-100) 0%,
-        transparent 60%
-      ),
-      radial-gradient(
-        50rem 36rem at 92% 8%,
-        var(--color-periwinkle-100) 0%,
-        transparent 62%
-      ),
-      var(--color-background);
+  .paper {
+    background: var(--paper);
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 78rem;
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  /* the small spaced-out capitals used above headings and on buttons */
+  .eyebrow {
+    font-size: var(--text-label);
+    letter-spacing: var(--text-label--letter-spacing);
+    line-height: var(--text-label--line-height);
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    min-height: 3.1rem;
+    padding: 0.7rem 1.9rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    border: 1px solid transparent;
+    transition:
+      background-color 250ms var(--ease-gentle),
+      border-color 250ms var(--ease-gentle),
+      color 250ms var(--ease-gentle);
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    color: var(--color-parchment-50);
+  }
+
+  .btn-primary:hover {
+    background-color: var(--color-primary-hover);
+  }
+
+  .btn-quiet {
+    border-color: var(--color-line-strong);
+    color: var(--color-ink);
+  }
+
+  .btn-quiet:hover {
+    border-color: var(--color-ink);
+  }
+
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+  }
+
+  .link {
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: var(--color-line-strong);
+    transition: text-decoration-color 200ms var(--ease-gentle);
+  }
+
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  /* fine grain laid over the colored grounds behind bars without photos */
+  .grain::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .2 0 0 0 0 .14 0 0 0 0 .1 0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .select-chevron {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%237a2834' stroke-width='1.2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 0.75rem;
+  }
+
+  /* long-form text: the policy pages */
+  .prose-ochar {
+    color: var(--color-ink-soft);
+    max-width: 40rem;
+  }
+
+  .prose-ochar > * + * {
+    margin-top: 1.1em;
+  }
+
+  .prose-ochar h2 {
+    margin-top: 2.4em;
+    font-size: 1.75rem;
+    line-height: 1.2;
+    color: var(--color-ink);
+  }
+
+  .prose-ochar h3 {
+    margin-top: 1.8em;
+    font-size: 1.3rem;
+    color: var(--color-ink);
+  }
+
+  .prose-ochar h2 + *,
+  .prose-ochar h3 + * {
+    margin-top: 0.6em;
+  }
+
+  .prose-ochar ul {
+    padding-left: 1.2em;
+    list-style: none;
+  }
+
+  .prose-ochar li {
+    position: relative;
+  }
+
+  .prose-ochar li + li {
+    margin-top: 0.4em;
+  }
+
+  .prose-ochar li::before {
+    content: "";
+    position: absolute;
+    left: -1.05em;
+    top: 0.72em;
+    width: 0.32em;
+    height: 0.32em;
+    transform: rotate(45deg);
+    background-color: var(--color-accent);
+  }
+
+  .prose-ochar a {
+    color: var(--color-primary);
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+  }
+
+  .prose-ochar strong {
+    font-weight: 600;
+    color: var(--color-ink);
   }
 }
 
@@ -102,6 +314,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
     transition-duration: 0.01ms !important;
   }
 }
