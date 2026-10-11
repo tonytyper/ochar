@@ -110,7 +110,7 @@ export default function Navbar() {
             className="font-display text-[2.1rem] leading-none text-primary lg:text-[2.6rem]"
             onClick={() => setOpen(false)}
           >
-            ochar
+            ochar - օճառ
             <span className="sr-only"> soap, home</span>
           </Link>
 
