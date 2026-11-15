@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { cart, useCart } from "@/lib/cart";
 import type { Product } from "@/lib/products";
-import { formatPrice } from "@/lib/site";
+import { formatPrice, MAX_QUANTITY } from "@/lib/site";
 import { Sprig } from "./ornament";
 import ProductImage from "./productart";
 import Quantity from "./quantity";
@@ -60,7 +60,13 @@ export default function CartView({
   );
   const freeShipping = freeOver > 0 && subtotal >= freeOver;
   const shippingCost = freeShipping ? 0 : flatRate;
-  const soldOut = items.filter(({ product }) => !product.in_stock);
+  // bars that can't be bought as the cart stands: sold out, curing, or more
+  // in the cart than there are left
+  const tooMany = (product: Product, quantity: number) =>
+    product.quantity !== null && quantity > product.quantity;
+  const soldOut = items.filter(
+    ({ product, quantity }) => !product.in_stock || tooMany(product, quantity),
+  );
 
   async function checkout() {
     setPending(true);
@@ -90,7 +96,10 @@ export default function CartView({
     encodeURIComponent(
       "Hello! I'd like to order:\n\n" +
         items
-          .map(({ product, quantity }) => `${quantity} x ${product.name}`)
+          .map(
+            ({ product, quantity }) =>
+              `${quantity} x ${product.name} (No. ${product.number})`,
+          )
           .join("\n") +
         "\n\nMy shipping address:\n\n",
     );
@@ -118,6 +127,9 @@ export default function CartView({
                   className="font-display text-[1.5rem] leading-tight transition-colors hover:text-primary"
                 >
                   {product.name}
+                  <span className="ml-2 align-middle font-serif text-[0.78rem] uppercase tracking-[0.16em] text-muted">
+                    No. {product.number}
+                  </span>
                 </Link>
                 <span className="tabular-nums lining-nums">
                   {formatPrice(product.price * quantity)}
@@ -126,16 +138,31 @@ export default function CartView({
               <p className="text-[0.95rem] text-muted">
                 {formatPrice(product.price)} each
               </p>
-              {!product.in_stock && (
+              {!product.in_stock ? (
                 <p className="mt-2 text-[0.95rem] text-primary">
-                  This bar has sold out since you added it.
+                  {product.status === "curing"
+                    ? "This bar is curing and can’t be ordered yet."
+                    : "This bar has sold out since you added it."}
                 </p>
+              ) : (
+                tooMany(product, quantity) && (
+                  <p className="mt-2 text-[0.95rem] text-primary">
+                    Only {product.quantity} left.
+                  </p>
+                )
               )}
               <div className="mt-auto flex items-center gap-6 pt-4">
                 <Quantity
                   compact
                   value={quantity}
-                  onChange={(value) => cart.setQuantity(product.slug, value)}
+                  onChange={(value) =>
+                    cart.setQuantity(
+                      product.slug,
+                      value,
+                      Math.max(product.quantity ?? MAX_QUANTITY, 1),
+                    )
+                  }
+                  max={product.quantity ?? MAX_QUANTITY}
                   label={`Quantity of ${product.name}`}
                 />
                 <button
@@ -187,7 +214,7 @@ export default function CartView({
               </button>
               {soldOut.length > 0 && (
                 <p className="mt-3 text-[0.95rem] text-primary">
-                  Remove the sold out bar to check out.
+                  Fix the bars marked above to check out.
                 </p>
               )}
               {error && (

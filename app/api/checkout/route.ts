@@ -55,7 +55,15 @@ export async function POST(request: NextRequest) {
       return fail("One of the bars in your cart is no longer sold.");
     }
     if (!product.in_stock) {
-      return fail(`${product.name} has sold out. Remove it to check out.`, 409);
+      return fail(
+        product.status === "curing"
+          ? `${product.name} is still curing. Remove it to check out.`
+          : `${product.name} has sold out. Remove it to check out.`,
+        409,
+      );
+    }
+    if (product.quantity !== null && quantity > product.quantity) {
+      return fail(`Only ${product.quantity} ${product.name} left.`, 409);
     }
 
     const unitAmount = Math.round(product.price * 100);

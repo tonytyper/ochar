@@ -3,18 +3,24 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { cart } from "@/lib/cart";
-import { formatPrice } from "@/lib/site";
+import { formatPrice, MAX_QUANTITY, type SoapStatus } from "@/lib/site";
 import Quantity from "./quantity";
 
 export default function AddToCart({
   slug,
   price,
   inStock,
+  status,
+  left,
 }: {
   slug: string;
   price: number;
   inStock: boolean;
+  status: SoapStatus;
+  // bars on hand, if known
+  left: number | null;
 }) {
+  const max = Math.min(left ?? MAX_QUANTITY, MAX_QUANTITY);
   const [quantity, setQuantity] = useState(1);
   const [added, setAdded] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -22,13 +28,16 @@ export default function AddToCart({
   useEffect(() => () => clearTimeout(timer.current), []);
 
   if (!inStock) {
+    const curing = status === "curing";
     return (
       <div>
         <button type="button" disabled className="btn btn-quiet w-full">
-          Sold out
+          {curing ? "Curing" : "Sold out"}
         </button>
         <p className="mt-3 text-[0.98rem] text-muted">
-          Back after the next batch has cured.{" "}
+          {curing
+            ? "On the curing rack now, and not ready to order yet."
+            : "Back after the next batch has cured."}{" "}
           <Link href="/contact" className="link text-ink-soft">
             Ask us
           </Link>{" "}
@@ -39,7 +48,7 @@ export default function AddToCart({
   }
 
   function add() {
-    cart.add(slug, quantity);
+    cart.add(slug, quantity, max);
     setAdded(true);
     clearTimeout(timer.current);
     timer.current = setTimeout(() => setAdded(false), 5000);
@@ -48,7 +57,12 @@ export default function AddToCart({
   return (
     <div>
       <div className="flex gap-3">
-        <Quantity value={quantity} onChange={setQuantity} label="Quantity" />
+        <Quantity
+          value={quantity}
+          onChange={setQuantity}
+          max={max}
+          label="Quantity"
+        />
         <button
           type="button"
           onClick={add}

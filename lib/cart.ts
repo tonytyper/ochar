@@ -92,17 +92,18 @@ export function useCartCount(): number | null {
 }
 
 export const cart = {
-  add(slug: string, quantity = 1) {
+  // max is how many of the bar are left, when that's known
+  add(slug: string, quantity = 1, max = MAX_QUANTITY) {
     const lines = read();
     const existing = lines.find((line) => line.slug === slug);
     if (existing) {
-      cart.setQuantity(slug, existing.quantity + quantity);
+      cart.setQuantity(slug, existing.quantity + quantity, max);
     } else {
-      write([...lines, { slug, quantity: Math.min(quantity, MAX_QUANTITY) }]);
+      write([...lines, { slug, quantity: Math.min(quantity, max, MAX_QUANTITY) }]);
     }
   },
 
-  setQuantity(slug: string, quantity: number) {
+  setQuantity(slug: string, quantity: number, max = MAX_QUANTITY) {
     if (quantity < 1) {
       cart.remove(slug);
       return;
@@ -110,7 +111,7 @@ export const cart = {
     write(
       read().map((line) =>
         line.slug === slug
-          ? { ...line, quantity: Math.min(quantity, MAX_QUANTITY) }
+          ? { ...line, quantity: Math.min(quantity, max, MAX_QUANTITY) }
           : line,
       ),
     );

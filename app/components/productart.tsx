@@ -41,7 +41,7 @@ export default function ProductImage({
       tilt={TILTS[(product.number - 1) % TILTS.length]}
       className={className}
       title={product.name}
-      line={`No. ${String(product.number).padStart(2, "0")}`}
+      line={`No. ${product.number}`}
       label={`${product.name} soap`}
     />
   );

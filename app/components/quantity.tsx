@@ -7,11 +7,13 @@ export default function Quantity({
   value,
   onChange,
   label,
+  max = MAX_QUANTITY,
   compact = false,
 }: {
   value: number;
   onChange: (value: number) => void;
   label: string;
+  max?: number;
   compact?: boolean;
 }) {
   const button =
@@ -43,7 +45,7 @@ export default function Quantity({
       <button
         type="button"
         aria-label="One more"
-        disabled={value >= MAX_QUANTITY}
+        disabled={value >= Math.min(max, MAX_QUANTITY)}
         onClick={() => onChange(value + 1)}
         className={`${button} ${compact ? "w-9" : "w-11"}`}
       >

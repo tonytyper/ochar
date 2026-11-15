@@ -5,12 +5,27 @@ import AddToCart from "@/app/components/addtocart";
 import Disclosure from "@/app/components/disclosure";
 import ProductImage from "@/app/components/productart";
 import ProductCard from "@/app/components/productcard";
-import { getOtherProducts, getProduct, getProducts } from "@/lib/products";
+import {
+  getOtherProducts,
+  getProduct,
+  getProducts,
+  type Product,
+} from "@/lib/products";
 import { formatPrice, site, siteUrl } from "@/lib/site";
 
 export const revalidate = 300;
 
 type Props = { params: Promise<{ slug: string }> };
+
+function stockLine({ status, quantity, in_stock }: Product) {
+  if (status === "curing") {
+    return quantity
+      ? `Curing · ${quantity} bars on the rack`
+      : "Curing · on the rack now";
+  }
+  if (!in_stock) return "Sold out";
+  return quantity ? `In stock · ${quantity} left` : "In stock";
+}
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -112,7 +127,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="lg:col-span-5">
           <div className={stickyPhotos ? "" : "lg:sticky lg:top-32"}>
             <p className="eyebrow">
-              No. {String(product.number).padStart(2, "0")} · Handmade soap
+              No. {product.number} · Handmade soap
             </p>
             <h1 className="mt-3 text-title">{product.name}</h1>
             <p className="mt-4 flex items-baseline gap-3">
@@ -120,6 +135,11 @@ export default async function ProductPage({ params }: Props) {
                 {formatPrice(product.price)}
               </span>
               <span className="text-muted">· about {site.barWeight}</span>
+            </p>
+            <p
+              className={`mt-2 text-[0.98rem] ${product.in_stock ? "text-leaf" : "text-primary"}`}
+            >
+              {stockLine(product)}
             </p>
             <p className="mt-6 text-[1.3rem] leading-relaxed text-ink-soft">
               {product.summary}
@@ -130,6 +150,8 @@ export default async function ProductPage({ params }: Props) {
                 slug={product.slug}
                 price={product.price}
                 inStock={product.in_stock}
+                status={product.status}
+                left={product.quantity}
               />
             </div>
 

@@ -20,17 +20,23 @@ export default function ProductCard({
           sizes={sizes}
           preload={preload}
           className={`transition-transform duration-[900ms] ease-gentle group-hover:scale-[1.03] ${
-            product.in_stock ? "" : "opacity-70 saturate-50"
+            product.status === "out-of-stock" || (!product.in_stock && product.status !== "curing")
+              ? "opacity-70 saturate-50"
+              : ""
           }`}
         />
         {!product.in_stock && (
           <span className="absolute left-3 top-3 bg-surface/90 px-2.5 py-1 text-[0.7rem] uppercase tracking-[0.16em] text-ink-soft">
-            Sold out
+            {product.status === "curing" ? "Curing" : "Sold out"}
           </span>
         )}
       </div>
 
-      <div className="mt-4 flex items-baseline justify-between gap-4">
+      {/* skipped when the bar has no name yet and is called by its number */}
+      <p className="eyebrow mt-4">
+        {product.name === `No. ${product.number}` ? " " : `No. ${product.number}`}
+      </p>
+      <div className="mt-1 flex items-baseline justify-between gap-4">
         <h3 className="text-[1.65rem] leading-tight text-ink transition-colors group-hover:text-primary">
           {product.name}
         </h3>
