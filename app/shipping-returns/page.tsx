@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeader from "@/app/components/pageheader";
-import { formatPrice, site } from "@/lib/site";
+import { formatPrice, shippingRates, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Shipping and returns",
@@ -31,10 +31,20 @@ export default function ShippingReturnsPage() {
 
           <h2>What it costs</h2>
           <p>
-            Shipping is a flat {formatPrice(shipping.flatRate)} per order
-            {shipping.freeOver ? `, and free on orders over ${formatPrice(shipping.freeOver)}` : ""}.
-            You’ll always see the exact cost before you pay.
+            Orders go by USPS Ground Advantage, with tracking. The cost depends on how many bars
+            are in the box:
           </p>
+          <table>
+            <tbody>
+              {shippingRates().map(({ label, price }) => (
+                <tr key={label}>
+                  <td>{label}</td>
+                  <td>{formatPrice(price)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p>You’ll always see the exact cost in your cart before you pay.</p>
 
           <h2>Where we ship</h2>
           <p>

@@ -11,7 +11,7 @@ import {
   getProducts,
   type Product,
 } from "@/lib/products";
-import { formatPrice, site, siteUrl } from "@/lib/site";
+import { formatPrice, shippingSentence, site, siteUrl } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -193,9 +193,7 @@ export default async function ProductPage({ params }: Props) {
               <Disclosure title="Shipping and returns">
                 <p>
                   Orders are sent within {shipping.processingDays}.{" "}
-                  {shipping.freeOver
-                    ? `Shipping is ${formatPrice(shipping.flatRate)}, and free on orders over ${formatPrice(shipping.freeOver)}.`
-                    : `Shipping is ${formatPrice(shipping.flatRate)}.`}
+                  {shippingSentence()}
                 </p>
                 <p>
                   Something arrived damaged? Write to us within{" "}

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { getProducts } from "@/lib/products";
-import { MAX_QUANTITY, site } from "@/lib/site";
+import { MAX_QUANTITY, shippingCost, site } from "@/lib/site";
 import { getStripe } from "@/lib/stripe";
 
 type AllowedCountry =
@@ -9,6 +9,31 @@ type AllowedCountry =
 
 function fail(error: string, status = 400) {
   return NextResponse.json({ error }, { status });
+}
+
+// the stripe coupon for the bulk discount, made the first time it's needed
+// (separately in test and live mode). its id carries the terms, so changing
+// site.discount makes a new one
+async function discountCoupon(stripe: Stripe) {
+  const { minBars, percent } = site.discount;
+  const id = `ochar-${percent}-off-${minBars}-bars`;
+  try {
+    return (await stripe.coupons.retrieve(id)).id;
+  } catch (error) {
+    if ((error as { code?: string }).code !== "resource_missing") throw error;
+  }
+  try {
+    await stripe.coupons.create({
+      id,
+      percent_off: percent,
+      duration: "once",
+      name: `${percent}% off ${minBars}+ bars`,
+    });
+  } catch (error) {
+    // made by another checkout at the same moment
+    if ((error as { code?: string }).code !== "resource_already_exists") throw error;
+  }
+  return id;
 }
 
 // turns the cart into a stripe checkout page and hands back its url. prices
@@ -48,7 +73,6 @@ export async function POST(request: NextRequest) {
   };
 
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
-  let subtotal = 0;
 
   for (const line of lines) {
     const { slug, quantity } = line ?? {};
@@ -78,7 +102,6 @@ export async function POST(request: NextRequest) {
     }
 
     const unitAmount = Math.round(product.price * 100);
-    subtotal += unitAmount * quantity;
     lineItems.push({
       quantity,
       price_data: {
@@ -95,7 +118,18 @@ export async function POST(request: NextRequest) {
   }
 
   const { shipping } = site;
-  const free = shipping.freeOver > 0 && subtotal >= shipping.freeOver * 100;
+  const bars = lineItems.reduce((sum, line) => sum + (line.quantity ?? 0), 0);
+  const shippingAmount = Math.round(shippingCost(bars) * 100);
+
+  let coupon: string | undefined;
+  if (bars >= site.discount.minBars) {
+    try {
+      coupon = await discountCoupon(stripe);
+    } catch (error) {
+      console.error("stripe coupon failed:", error);
+      return fail("We couldn’t open the payment page. Please try again.", 502);
+    }
+  }
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -111,9 +145,9 @@ export async function POST(request: NextRequest) {
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            display_name: free ? "Free shipping" : "Standard shipping",
+            display_name: "USPS Ground Advantage",
             fixed_amount: {
-              amount: free ? 0 : Math.round(shipping.flatRate * 100),
+              amount: shippingAmount,
               currency: site.currency,
             },
             delivery_estimate: {
@@ -123,6 +157,8 @@ export async function POST(request: NextRequest) {
           },
         },
       ],
+      // applies to the soap only, not shipping
+      discounts: coupon ? [{ coupon }] : undefined,
       // turn on once stripe tax is set up in the dashboard
       // automatic_tax: { enabled: true },
     });

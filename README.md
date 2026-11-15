@@ -21,7 +21,7 @@ email" instead of card checkout.
 
 | What | Where |
 | --- | --- |
-| Email, shipping rates, free shipping threshold, bar weight, return window | `lib/site.ts` |
+| Email, shipping rates, the six-bar discount, bar weight, return window | `lib/site.ts` |
 | Colours and fonts | `app/globals.css` |
 | Products | the Supabase `products` table (until then, the bottom of `lib/products.ts`) |
 | Home page | `app/page.tsx` and `app/components/herosection.tsx` |

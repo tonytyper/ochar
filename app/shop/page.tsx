@@ -3,7 +3,7 @@ import Link from "next/link";
 import PageHeader from "@/app/components/pageheader";
 import ProductCard from "@/app/components/productcard";
 import { getProducts, type Product } from "@/lib/products";
-import { formatPrice, inWords, site, STATUSES, type SoapStatus } from "@/lib/site";
+import { discountLine, formatPrice, inWords, site, STATUSES, type SoapStatus } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -78,7 +78,7 @@ export default async function ShopPage() {
           {[
             ["Every bar", `About ${site.barWeight}, cut by hand, so no two are quite the same size.`],
             ["Ingredients", "Listed in full on each bar's page, just as on the box."],
-            ["Shipping", `Sent within ${site.shipping.processingDays}. ${site.shipping.freeOver ? `Free on orders over ${formatPrice(site.shipping.freeOver)}.` : ""}`],
+            ["Shipping", `Sent within ${site.shipping.processingDays}, from ${formatPrice(site.shipping.rates[0].price)}. ${discountLine()}.`],
             ["Sensitive skin", "Patch test a new bar first, and ask us if you are unsure which to choose."],
           ].map(([term, detail]) => (
             <div key={term}>

@@ -22,8 +22,6 @@ export default async function CartPage() {
         <CartView
           products={products}
           checkoutEnabled={checkoutEnabled()}
-          flatRate={site.shipping.flatRate}
-          freeOver={site.shipping.freeOver}
           email={site.email}
         />
       </section>

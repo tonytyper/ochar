@@ -4,7 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { cart, useCart } from "@/lib/cart";
 import type { Product } from "@/lib/products";
-import { formatPrice, MAX_QUANTITY } from "@/lib/site";
+import {
+  discountFor,
+  formatPrice,
+  inWords,
+  MAX_QUANTITY,
+  shippingCost as costFor,
+  site,
+} from "@/lib/site";
 import { Sprig } from "./ornament";
 import ProductImage from "./productart";
 import Quantity from "./quantity";
@@ -12,18 +19,12 @@ import Quantity from "./quantity";
 interface Props {
   products: Product[];
   checkoutEnabled: boolean;
-  flatRate: number;
-  freeOver: number;
   email: string;
 }
 
-export default function CartView({
-  products,
-  checkoutEnabled,
-  flatRate,
-  freeOver,
-  email,
-}: Props) {
+const { minBars, percent } = site.discount;
+
+export default function CartView({ products, checkoutEnabled, email }: Props) {
   const lines = useCart();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
@@ -58,8 +59,10 @@ export default function CartView({
     (sum, { product, quantity }) => sum + product.price * quantity,
     0,
   );
-  const freeShipping = freeOver > 0 && subtotal >= freeOver;
-  const shippingCost = freeShipping ? 0 : flatRate;
+  const bars = items.reduce((sum, { quantity }) => sum + quantity, 0);
+  const discount = discountFor(bars, subtotal);
+  const shippingCost = costFor(bars);
+  const barsToDiscount = minBars - bars;
   // bars that can't be bought as the cart stands: sold out, curing, or more
   // in the cart than there are left
   const tooMany = (product: Product, quantity: number) =>
@@ -186,19 +189,29 @@ export default function CartView({
               <dt className="text-ink-soft">Subtotal</dt>
               <dd>{formatPrice(subtotal)}</dd>
             </div>
+            {discount > 0 && (
+              <div className="flex justify-between text-leaf">
+                <dt>
+                  {percent}% off {inWords(minBars)} or more bars
+                </dt>
+                <dd>&minus;{formatPrice(discount)}</dd>
+              </div>
+            )}
             <div className="flex justify-between">
               <dt className="text-ink-soft">Shipping</dt>
-              <dd>{freeShipping ? "Free" : formatPrice(shippingCost)}</dd>
+              <dd>{formatPrice(shippingCost)}</dd>
             </div>
             <div className="flex justify-between border-t border-line pt-4 text-[1.3rem]">
               <dt>Total</dt>
-              <dd>{formatPrice(subtotal + shippingCost)}</dd>
+              <dd>{formatPrice(subtotal - discount + shippingCost)}</dd>
             </div>
           </dl>
 
-          {freeOver > 0 && !freeShipping && (
+          {barsToDiscount > 0 && (
             <p className="mt-4 text-[0.95rem] text-leaf">
-              Add {formatPrice(freeOver - subtotal)} more for free shipping.
+              Add {inWords(barsToDiscount)} more{" "}
+              {barsToDiscount === 1 ? "bar" : "bars"} for {percent}% off your
+              soap.
             </p>
           )}
 

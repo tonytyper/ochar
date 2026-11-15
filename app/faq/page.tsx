@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Disclosure from "@/app/components/disclosure";
 import PageHeader from "@/app/components/pageheader";
-import { formatPrice, inWords, site } from "@/lib/site";
+import { formatPrice, inWords, shippingRates, site } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -32,11 +32,21 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
         q: "How much is shipping?",
         a: (
           <p>
-            A flat {formatPrice(shipping.flatRate)} per order
-            {shipping.freeOver
-              ? `, and free on orders over ${formatPrice(shipping.freeOver)}`
-              : ""}
-            .
+            It goes by how many bars are in the order:{" "}
+            {shippingRates()
+              .map(({ label, price }) => `${formatPrice(price)} for ${label.toLowerCase()}`)
+              .join(", ")}
+            . Everything goes by USPS Ground Advantage, with tracking.
+          </p>
+        ),
+      },
+      {
+        q: "Is there a discount for buying more?",
+        a: (
+          <p>
+            Yes. Order {inWords(site.discount.minBars)} or more bars, any mix,
+            and you get {site.discount.percent}% off the soap. It comes off in
+            your cart automatically, with no code to enter.
           </p>
         ),
       },

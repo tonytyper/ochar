@@ -18,10 +18,19 @@ export const site = {
   cureWeeks: 6,
 
   currency: "usd",
+  // money off the soap (not shipping) once an order has this many bars
+  discount: { minBars: 6, percent: 10 },
   shipping: {
-    // PLACEHOLDER: all in dollars
-    flatRate: 6,
-    freeOver: 50,
+    // what a customer pays, by the number of bars in the order. set from usps
+    // ground advantage commercial prices (oct 2026), about the middle zone. a
+    // bar is at most 150 g packed, so with the mailer 1-2 bars go under 1 lb,
+    // 3-5 under 2 lb and 6-8 under 3 lb. dollars
+    rates: [
+      { upTo: 2, price: 8 },
+      { upTo: 5, price: 10.5 },
+      { upTo: 8, price: 12.5 },
+      { upTo: Infinity, price: 15 },
+    ],
     // two-letter country codes stripe will accept a shipping address for
     countries: ["US"],
     processingDays: "2 to 4 business days",
@@ -132,4 +141,49 @@ export function inWords(n: number, capitalize = false) {
 
 export function formatPrice(price: number) {
   return "$" + price.toFixed(price % 1 === 0 ? 0 : 2);
+}
+
+// shipping for an order of this many bars, in dollars
+export function shippingCost(bars: number) {
+  const { rates } = site.shipping;
+  if (bars <= 0) return 0;
+  return (rates.find((rate) => bars <= rate.upTo) ?? rates[rates.length - 1]).price;
+}
+
+// the discount on an order, in dollars, rounded to the cent like stripe does
+export function discountFor(bars: number, subtotal: number) {
+  const { minBars, percent } = site.discount;
+  if (bars < minBars) return 0;
+  const cents = Math.round(subtotal * 100);
+  return Math.round((cents * percent) / 100) / 100;
+}
+
+// "10% off six or more bars"
+export function discountLine() {
+  const { minBars, percent } = site.discount;
+  return `${percent}% off ${inWords(minBars)} or more bars`;
+}
+
+// the rates as rows to show: "One or two bars", $8
+export function shippingRates() {
+  const { rates } = site.shipping;
+  return rates.map((rate, i) => {
+    const from = i === 0 ? 1 : rates[i - 1].upTo + 1;
+    const label =
+      rate.upTo === Infinity
+        ? `${inWords(from, true)} or more bars`
+        : rate.upTo === from + 1
+          ? `${inWords(from, true)} or ${inWords(rate.upTo)} bars`
+          : `${inWords(from, true)} to ${inWords(rate.upTo)} bars`;
+    return { label, price: rate.price };
+  });
+}
+
+// one sentence for the faq and product pages
+export function shippingSentence() {
+  const { rates } = site.shipping;
+  const [first, ...rest] = rates;
+  return `Shipping goes by the number of bars: ${formatPrice(first.price)} for ${
+    first.upTo === 1 ? "one" : `up to ${inWords(first.upTo)}`
+  }, rising to ${formatPrice(rest.length ? rest[rest.length - 1].price : first.price)} for a big order.`;
 }

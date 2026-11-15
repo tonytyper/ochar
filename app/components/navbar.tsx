@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCartCount } from "@/lib/cart";
-import { formatPrice, mainNav, secondaryNav, site } from "@/lib/site";
+import { discountLine, mainNav, secondaryNav, site } from "@/lib/site";
 
 function isCurrent(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(href + "/");
@@ -65,14 +65,10 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const freeOver = site.shipping.freeOver;
-
   return (
     <>
       <p className="bg-primary px-4 py-2 text-center text-[0.74rem] uppercase tracking-[0.18em] text-parchment-50">
-        {freeOver
-          ? `Free shipping on orders over ${formatPrice(freeOver)}`
-          : "Small batches, cut and boxed by hand"}
+        {discountLine()}
       </p>
 
       <header className="paper sticky top-0 z-40 border-b border-line">
