@@ -14,8 +14,11 @@ export default function ShippingReturnsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Help" title="Shipping and returns">
-        <p>The short version: packed by hand, sent quickly, and put right if anything goes wrong.</p>
+      <PageHeader title="Shipping and returns">
+        <p>
+          The short version: packed by hand and sent quickly. All sales are final, but if we
+          send you the wrong bar, we’ll fix it.
+        </p>
       </PageHeader>
 
       <div className="wrap pb-24 lg:pb-32">
@@ -53,32 +56,34 @@ export default function ShippingReturnsPage() {
               : "We ship to the countries offered at checkout."}
           </p>
 
-          <h2>Damaged, missing or wrong items</h2>
+          <h2>All sales are final</h2>
           <p>
-            If something arrives damaged or isn’t what you ordered, email us at{" "}
-            <a href={`mailto:${email}`}>{email}</a> within {shipping.claimDays} days of delivery,
-            with your name and a photo. We’ll send a replacement or refund you in full, whichever
-            you prefer.
+            Soap is a personal care product. Once a bar has left us, we can’t take it back and
+            sell it to someone else, so we don’t accept returns or exchanges, and we can’t refund
+            an order because you’ve changed your mind. Please check your order and shipping
+            address before you pay.
           </p>
 
-          <h2>Returns</h2>
+          <h2>If we send the wrong item</h2>
           <p>
-            Soap is a personal care product, so we can’t take back bars that have been opened or
-            used. If you change your mind about an unopened order, write to us within{" "}
-            {shipping.returnDays} days of delivery. Once it’s back with us in its original
-            box, we’ll refund the cost of the soap. Return postage is yours to cover.
+            This is the one case we refund. If the bar in your box isn’t the one you ordered,
+            email us at <a href={`mailto:${email}`}>{email}</a> within {shipping.claimDays} days
+            of delivery, with your name and a photo of what arrived. We’ll send the right bar, or
+            refund it if that soap has sold out. You don’t need to send the wrong one back.
           </p>
 
-          <h2>Lost parcels</h2>
+          <h2>Damaged or lost in the post</h2>
           <p>
-            If tracking says your parcel was delivered but it isn’t there, check with neighbours
-            and your local post office first. Then let us know, and we’ll help however we can.
+            Every bar is boxed and packed with care, but once a parcel is with USPS, it’s out of
+            our hands, and we can’t replace or refund parcels that are damaged, delayed or lost
+            in the post. If tracking says your parcel was delivered but it isn’t there, check
+            with neighbours and your local post office.
           </p>
 
           <h2>Refunds</h2>
           <p>
-            Refunds go back to the card you paid with. Your bank may take 5 to 10 business days
-            to show it.
+            A refund for a wrong item goes back to the card you paid with. Your bank may take 5
+            to 10 business days to show it.
           </p>
 
           <p>

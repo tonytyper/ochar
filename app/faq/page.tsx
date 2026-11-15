@@ -69,17 +69,22 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
         q: "Can I change or cancel my order?",
         a: (
           <p>
-            Write to us as soon as you can. If it hasn’t been packed yet, we’re
-            happy to change or cancel it.
+            Orders are final once they’re paid for, so please check yours
+            before you check out. If the shipping address is wrong, write to
+            us straight away, and we’ll correct it if the parcel hasn’t gone
+            out yet.
           </p>
         ),
       },
       {
-        q: "My order arrived damaged. What now?",
+        q: "Can I return a bar?",
         a: (
           <p>
-            We’re sorry. Email us within {shipping.claimDays} days of delivery
-            with a photo, and we’ll send a replacement or a refund. More on our{" "}
+            No, sorry. Soap is a personal care product, and we can’t sell a
+            bar to anyone else once it has left us, so all sales are final.
+            The one exception is if we send the wrong bar. Email us within{" "}
+            {shipping.claimDays} days of delivery with a photo, and we’ll send
+            the right one or refund it. More on our{" "}
             <Link href="/shipping-returns">shipping and returns</Link> page.
           </p>
         ),
@@ -197,7 +202,7 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
 export default function FaqPage() {
   return (
     <>
-      <PageHeader eyebrow="Help" title="Questions, answered.">
+      <PageHeader title="Questions, answered.">
         <p>
           The things we’re asked most. If yours isn’t here,{" "}
           <Link href="/contact" className="link text-ink">
