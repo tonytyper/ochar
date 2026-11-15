@@ -8,7 +8,8 @@
 
 create table if not exists public.products (
   id          uuid primary key default gen_random_uuid(),
-  slug        text unique,                  -- the url: /shop/<slug>. made from the name if empty
+  number      integer,                      -- the soap's number, as written on its box
+  slug        text unique,                  -- the url: /shop/<slug>. made from name and number if empty
   name        text not null,
   description text,                         -- the short summary shown under the name
   ingredients text[] not null default '{}', -- one ingredient per item, in label order
@@ -17,10 +18,17 @@ create table if not exists public.products (
   gallery     text[] not null default '{}', -- more photos for the bar's page, same format
   tone        text,                         -- label colour when there's no photo: lavender, sea,
                                             -- orris, chamomile, apricot, sage, oat, fir, rose, clay
-  in_stock    boolean not null default true,
+  status      text not null default 'for-sale'
+              check (status in ('for-sale', 'curing', 'out-of-stock')),
+  quantity    integer check (quantity >= 0), -- bars on hand, or on the rack while curing
   sort_order  integer not null default 0,   -- lower numbers come first in the shop
   created_at  timestamptz not null default now()
 );
+
+-- for a table made by an earlier version of this file
+alter table public.products add column if not exists number integer;
+alter table public.products add column if not exists status text not null default 'for-sale';
+alter table public.products add column if not exists quantity integer;
 
 alter table public.products enable row level security;
 

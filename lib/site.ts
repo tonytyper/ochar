@@ -5,10 +5,11 @@ export const site = {
   // PLACEHOLDER: the name on your business registration / stripe account
   legalName: "Ochar Soap Co.",
   family: "the Tonoyans",
+  motto: "Our goal is quality",
   description:
-    "Homemade, all-natural soap from the Tonoyan family. Plant oils, real botanicals and a six-week cure, cut and wrapped by hand.",
-  // PLACEHOLDER
-  email: "hello@ocharsoap.com",
+    "Homemade, all-natural soap from the Tonoyan family. Olive oil, shea butter and a six-week cure, cut and boxed by hand.",
+  // PLACEHOLDER: the domain is ocharsoap.co, as on the boxes. the inbox is a guess
+  email: "hello@ocharsoap.co",
   // PLACEHOLDER: city and state, shown in the footer and on the contact page
   location: "",
   // PLACEHOLDER: full instagram url, or leave empty to hide the link
@@ -34,11 +35,32 @@ export const site = {
 
   // a landscape photo for the top of the home page. a path in /public, a file
   // in the supabase product-images bucket, or a full url. empty uses the label
-  heroImage: "",
+  heroImage: "/products/ocean-breeze-37-1.jpg",
 
   // shown at the top of the privacy and terms pages
   policiesUpdated: "October 2026",
 };
+
+// where a bar is: on the shelf, on the curing rack, or gone until next time
+export type SoapStatus = "for-sale" | "curing" | "out-of-stock";
+
+export const STATUSES: { status: SoapStatus; title: string; blurb: string }[] = [
+  {
+    status: "for-sale",
+    title: "For sale",
+    blurb: "Cured, boxed and ready to send.",
+  },
+  {
+    status: "curing",
+    title: "Curing",
+    blurb: "On the rack now. These can’t be ordered until the cure is done.",
+  },
+  {
+    status: "out-of-stock",
+    title: "Out of stock",
+    blurb: "Sold out for now, and back after the next batch.",
+  },
+];
 
 // the most of one bar a cart can hold
 export const MAX_QUANTITY = 20;
