@@ -72,7 +72,7 @@ export default function Navbar() {
       <p className="bg-primary px-4 py-2 text-center text-[0.74rem] uppercase tracking-[0.18em] text-parchment-50">
         {freeOver
           ? `Free shipping on orders over ${formatPrice(freeOver)}`
-          : "Small batches, cut and wrapped by hand"}
+          : "Small batches, cut and boxed by hand"}
       </p>
 
       <header className="paper sticky top-0 z-40 border-b border-line">
@@ -105,14 +105,19 @@ export default function Navbar() {
             {open ? "Close" : "Menu"}
           </button>
 
-          <Link
-            href="/"
-            className="font-display text-[2.1rem] leading-none text-primary lg:text-[2.6rem]"
-            onClick={() => setOpen(false)}
-          >
-            ochar - օճառ
-            <span className="sr-only"> soap, home</span>
-          </Link>
+          <div className="flex flex-col items-center text-center">
+            <Link
+              href="/"
+              className="font-display text-[2.1rem] leading-none text-primary lg:text-[2.6rem]"
+              onClick={() => setOpen(false)}
+            >
+              ochar - օճառ
+              <span className="sr-only"> soap, home</span>
+            </Link>
+            <p className="mt-1 text-[0.85rem] italic leading-none text-muted lg:mt-1.5 lg:text-[0.98rem]">
+              {site.motto}
+            </p>
+          </div>
 
           <div className="flex items-center justify-end gap-8">
             <nav
