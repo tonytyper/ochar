@@ -12,7 +12,7 @@ export default function PrivacyPage() {
 
   return (
     <>
-      <PageHeader eyebrow="The small print" title="Privacy">
+      <PageHeader title="Privacy">
         <p>Last updated {site.policiesUpdated}.</p>
       </PageHeader>
 

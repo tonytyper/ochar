@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import PageHeader from "@/app/components/pageheader";
-import ProductCard from "@/app/components/productcard";
+import ProductCard, { GRID } from "@/app/components/productcard";
 import { getProducts, type Product } from "@/lib/products";
 import { discountLine, formatPrice, inWords, site, STATUSES, type SoapStatus } from "@/lib/site";
 
@@ -31,7 +31,7 @@ export default async function ShopPage() {
 
   return (
     <>
-      <PageHeader eyebrow="The shop" title="The soaps">
+      <PageHeader title="Our soaps">
         <p>
           Every bar is cured for {inWords(site.cureWeeks)} weeks and cut by
           hand. Each one is numbered, so you can always find the same batch
@@ -60,12 +60,12 @@ export default async function ShopPage() {
               <h2 className="text-section">{group.title}</h2>
               <p className="text-ink-soft">{group.blurb}</p>
             </div>
-            <div className="mt-10 grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={`mt-10 ${GRID}`}>
               {group.products.map((product, i) => (
                 <ProductCard
                   key={product.id}
                   product={product}
-                  preload={g === 0 && i < 3}
+                  preload={g === 0 && i < 4}
                 />
               ))}
             </div>
@@ -76,7 +76,7 @@ export default async function ShopPage() {
       <section className="border-t border-line bg-sunken">
         <dl className="wrap grid gap-10 py-16 sm:grid-cols-2 lg:grid-cols-4 lg:py-20">
           {[
-            ["Every bar", `About ${site.barWeight}, cut by hand, so no two are quite the same size.`],
+            ["Every bar", `About ${site.barWeight} on average, cut by hand, so no two are quite the same size.`],
             ["Ingredients", "Listed in full on each bar's page, just as on the box."],
             ["Shipping", `Sent within ${site.shipping.processingDays}, from ${formatPrice(site.shipping.rates[0].price)}. ${discountLine()}.`],
             ["Sensitive skin", "Patch test a new bar first, and ask us if you are unsure which to choose."],

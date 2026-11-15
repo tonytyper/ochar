@@ -13,7 +13,7 @@ export default function TermsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="The small print" title="Terms of sale">
+      <PageHeader title="Terms of sale">
         <p>Last updated {site.policiesUpdated}.</p>
       </PageHeader>
 

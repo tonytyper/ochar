@@ -3,15 +3,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AddToCart from "@/app/components/addtocart";
 import Disclosure from "@/app/components/disclosure";
-import ProductImage from "@/app/components/productart";
-import ProductCard from "@/app/components/productcard";
+import { Parcel, Return, Tag } from "@/app/components/icons";
+import ProductGallery from "@/app/components/productgallery";
+import ProductCard, { GRID } from "@/app/components/productcard";
 import {
   getOtherProducts,
   getProduct,
   getProducts,
   type Product,
 } from "@/lib/products";
-import { formatPrice, shippingSentence, site, siteUrl } from "@/lib/site";
+import { discountLine, formatPrice, shippingSentence, site, siteUrl } from "@/lib/site";
 
 export const revalidate = 300;
 
@@ -56,7 +57,7 @@ export default async function ProductPage({ params }: Props) {
     notFound();
   }
 
-  const others = await getOtherProducts(slug, 3);
+  const others = await getOtherProducts(slug, 4);
   const photos = [product.image, ...product.gallery].filter(
     (src): src is string => Boolean(src),
   );
@@ -107,34 +108,21 @@ export default async function ProductPage({ params }: Props) {
 
       <section className="wrap grid gap-10 pb-24 pt-6 lg:grid-cols-12 lg:gap-14 lg:pb-32">
         <div
-          className={`space-y-4 self-start lg:col-span-7 ${stickyPhotos ? "lg:sticky lg:top-32" : ""}`}
+          className={`self-start lg:col-span-7 ${stickyPhotos ? "lg:sticky lg:top-32" : ""}`}
         >
-          {(photos.length ? photos : [null]).map((src, i) => (
-            <div
-              key={src ?? "label"}
-              className="relative aspect-photo overflow-hidden bg-sunken"
-            >
-              <ProductImage
-                product={product}
-                src={src}
-                sizes="(min-width: 1024px) 56vw, 100vw"
-                preload={i === 0}
-              />
-            </div>
-          ))}
+          <ProductGallery product={product} photos={photos} />
         </div>
 
         <div className="lg:col-span-5">
           <div className={stickyPhotos ? "" : "lg:sticky lg:top-32"}>
-            <p className="eyebrow">
-              No. {product.number} · Handmade soap
-            </p>
-            <h1 className="mt-3 text-title">{product.name}</h1>
-            <p className="mt-4 flex items-baseline gap-3">
+            <h1 className="text-title">{product.name}</h1>
+            <p className="mt-4 flex flex-wrap items-baseline gap-x-3">
               <span className="text-[1.6rem] text-ink">
                 {formatPrice(product.price)}
               </span>
-              <span className="text-muted">· about {site.barWeight}</span>
+              <span className="text-muted">
+                · No. {product.number} · about {site.barWeight}
+              </span>
             </p>
             <p
               className={`mt-2 text-[0.98rem] ${product.in_stock ? "text-leaf" : "text-primary"}`}
@@ -154,6 +142,28 @@ export default async function ProductPage({ params }: Props) {
                 left={product.quantity}
               />
             </div>
+
+            {/* what people want to know before they buy */}
+            <ul className="mt-6 space-y-2.5 text-[1rem] text-ink-soft">
+              <li className="flex items-center gap-3">
+                <Parcel className="size-5 shrink-0 text-accent" />
+                Sent within {shipping.processingDays} by USPS, from{" "}
+                {formatPrice(shipping.rates[0].price)}
+              </li>
+              <li className="flex items-center gap-3">
+                <Tag className="size-5 shrink-0 text-accent" />
+                {discountLine()}, any mix
+              </li>
+              <li className="flex items-center gap-3">
+                <Return className="size-5 shrink-0 text-accent" />
+                <span>
+                  Sales are final.{" "}
+                  <Link href="/shipping-returns" className="link">
+                    Policy
+                  </Link>
+                </span>
+              </li>
+            </ul>
 
             {product.ingredients.length > 0 && (
               <div className="mt-8 border-t border-line pt-8">
@@ -196,8 +206,10 @@ export default async function ProductPage({ params }: Props) {
                   {shippingSentence()}
                 </p>
                 <p>
-                  Something arrived damaged? Write to us within{" "}
-                  {shipping.claimDays} days and we’ll put it right.{" "}
+                  Soap can’t be taken back and resold, so all sales are final.
+                  If we send you the wrong bar, write to us within{" "}
+                  {shipping.claimDays} days and we’ll send the right one or
+                  refund it.{" "}
                   <Link href="/shipping-returns" className="link text-ink">
                     Full details
                   </Link>
@@ -212,12 +224,12 @@ export default async function ProductPage({ params }: Props) {
         <section className="border-t border-line">
           <div className="wrap py-20 lg:py-28">
             <div className="flex flex-wrap items-end justify-between gap-6">
-              <h2 className="text-section">Other bars</h2>
+              <h2 className="text-section">You might also like</h2>
               <Link href="/shop" className="link text-lg text-ink">
                 See all soaps
               </Link>
             </div>
-            <div className="mt-10 grid gap-x-8 gap-y-16 sm:grid-cols-2 lg:grid-cols-3">
+            <div className={`mt-10 ${GRID}`}>
               {others.map((other) => (
                 <ProductCard key={other.id} product={other} />
               ))}

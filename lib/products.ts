@@ -165,14 +165,6 @@ export async function getProduct(slug: string) {
   return products.find((product) => product.slug === slug) || null;
 }
 
-export async function getFeaturedProducts(limit = 3) {
-  const products = await getProducts();
-  return products
-    .filter((product) => product.in_stock)
-    .sort((a, b) => Number(!a.image) - Number(!b.image))
-    .slice(0, limit);
-}
-
 // a few other bars to show under a product, starting after it in the
 // catalogue so each page suggests something different
 export async function getOtherProducts(slug: string, limit = 3) {

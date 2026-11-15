@@ -327,6 +327,17 @@
   }
 }
 
+@keyframes drawer {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+/* the page behind an open cart drawer doesn't scroll */
+html:has(dialog[open]) {
+  overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

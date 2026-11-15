@@ -11,6 +11,7 @@ interface ProductImageProps {
   sizes: string;
   preload?: boolean;
   className?: string;
+  alt?: string;
 }
 
 // fills its parent, which sets the shape (usually aspect-photo). shows the
@@ -21,12 +22,13 @@ export default function ProductImage({
   sizes,
   preload = false,
   className = "",
+  alt = `${product.name} soap`,
 }: ProductImageProps) {
   if (src) {
     return (
       <Image
         src={src}
-        alt={`${product.name} soap`}
+        alt={alt}
         fill
         sizes={sizes}
         preload={preload}

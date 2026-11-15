@@ -1,5 +1,6 @@
 import { useSyncExternalStore } from "react";
-import { MAX_QUANTITY } from "@/lib/site";
+import type { Product } from "@/lib/products";
+import { discountFor, MAX_QUANTITY, shippingCost } from "@/lib/site";
 
 // the cart only remembers which bars and how many. names and prices are
 // looked up fresh from the catalogue, so a stale cart can't carry old prices
@@ -125,3 +126,77 @@ export const cart = {
     write(EMPTY);
   },
 };
+
+// more in the cart than there are left
+export function tooMany(product: Product, quantity: number) {
+  return product.quantity !== null && quantity > product.quantity;
+}
+
+// the cart priced from the catalogue: what the cart page and drawer show,
+// worked out the same way the server does at checkout
+export function cartTotals(lines: CartLine[], products: Product[]) {
+  // bars that have left the catalogue since they were added are skipped
+  const items = lines.flatMap((line) => {
+    const product = products.find((p) => p.slug === line.slug);
+    return product ? [{ product, quantity: line.quantity }] : [];
+  });
+  const bars = items.reduce((sum, { quantity }) => sum + quantity, 0);
+  const subtotal = items.reduce(
+    (sum, { product, quantity }) => sum + product.price * quantity,
+    0,
+  );
+  const discount = discountFor(bars, subtotal);
+  const shipping = shippingCost(bars);
+  // bars that can't be bought as the cart stands
+  const blocked = items.filter(
+    ({ product, quantity }) => !product.in_stock || tooMany(product, quantity),
+  );
+  return {
+    items,
+    bars,
+    subtotal,
+    discount,
+    shipping,
+    total: subtotal - discount + shipping,
+    blocked,
+  };
+}
+
+// sends the cart to /api/checkout and on to stripe's payment page
+export async function startCheckout(lines: CartLine[]) {
+  const response = await fetch("/api/checkout", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ items: lines }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.url) {
+    throw new Error(data.error || "Checkout couldn’t be started.");
+  }
+  window.location.assign(data.url);
+}
+
+// whether the slide-out cart is open. adding a bar opens it
+let drawerOpen = false;
+const drawerListeners = new Set<() => void>();
+
+function setDrawer(open: boolean) {
+  drawerOpen = open;
+  drawerListeners.forEach((listener) => listener());
+}
+
+export const drawer = {
+  open: () => setDrawer(true),
+  close: () => setDrawer(false),
+};
+
+export function useDrawerOpen() {
+  return useSyncExternalStore(
+    (listener) => {
+      drawerListeners.add(listener);
+      return () => drawerListeners.delete(listener);
+    },
+    () => drawerOpen,
+    () => false,
+  );
+}

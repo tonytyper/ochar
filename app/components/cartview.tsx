@@ -2,16 +2,10 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { cart, useCart } from "@/lib/cart";
+import { cart, cartTotals, startCheckout, tooMany, useCart } from "@/lib/cart";
 import type { Product } from "@/lib/products";
-import {
-  discountFor,
-  formatPrice,
-  inWords,
-  MAX_QUANTITY,
-  shippingCost as costFor,
-  site,
-} from "@/lib/site";
+import { formatPrice, inWords, MAX_QUANTITY, site } from "@/lib/site";
+import DiscountProgress from "./discountprogress";
 import { Sprig } from "./ornament";
 import ProductImage from "./productart";
 import Quantity from "./quantity";
@@ -34,11 +28,15 @@ export default function CartView({ products, checkoutEnabled, email }: Props) {
     return <div aria-busy="true" className="min-h-[40vh]" />;
   }
 
-  // bars that have left the catalogue since they were added are skipped
-  const items = lines.flatMap((line) => {
-    const product = products.find((p) => p.slug === line.slug);
-    return product ? [{ product, quantity: line.quantity }] : [];
-  });
+  const {
+    items,
+    subtotal,
+    bars,
+    discount,
+    shipping: shippingCost,
+    total,
+    blocked: soldOut,
+  } = cartTotals(lines, products);
 
   if (items.length === 0) {
     return (
@@ -55,36 +53,12 @@ export default function CartView({ products, checkoutEnabled, email }: Props) {
     );
   }
 
-  const subtotal = items.reduce(
-    (sum, { product, quantity }) => sum + product.price * quantity,
-    0,
-  );
-  const bars = items.reduce((sum, { quantity }) => sum + quantity, 0);
-  const discount = discountFor(bars, subtotal);
-  const shippingCost = costFor(bars);
-  const barsToDiscount = minBars - bars;
-  // bars that can't be bought as the cart stands: sold out, curing, or more
-  // in the cart than there are left
-  const tooMany = (product: Product, quantity: number) =>
-    product.quantity !== null && quantity > product.quantity;
-  const soldOut = items.filter(
-    ({ product, quantity }) => !product.in_stock || tooMany(product, quantity),
-  );
-
   async function checkout() {
+    if (!lines) return;
     setPending(true);
     setError("");
     try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: lines }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok || !data.url) {
-        throw new Error(data.error || "Checkout couldn’t be started.");
-      }
-      window.location.assign(data.url);
+      await startCheckout(lines);
     } catch (problem) {
       setError(
         problem instanceof Error ? problem.message : "Something went wrong.",
@@ -184,6 +158,9 @@ export default function CartView({ products, checkoutEnabled, email }: Props) {
       <aside className="lg:col-span-4 lg:col-start-9">
         <div className="border border-line bg-surface p-7 lg:sticky lg:top-32">
           <h2 className="text-[1.7rem]">Summary</h2>
+          <div className="mt-5">
+            <DiscountProgress bars={bars} />
+          </div>
           <dl className="mt-6 space-y-3 tabular-nums lining-nums">
             <div className="flex justify-between">
               <dt className="text-ink-soft">Subtotal</dt>
@@ -203,17 +180,9 @@ export default function CartView({ products, checkoutEnabled, email }: Props) {
             </div>
             <div className="flex justify-between border-t border-line pt-4 text-[1.3rem]">
               <dt>Total</dt>
-              <dd>{formatPrice(subtotal - discount + shippingCost)}</dd>
+              <dd>{formatPrice(total)}</dd>
             </div>
           </dl>
-
-          {barsToDiscount > 0 && (
-            <p className="mt-4 text-[0.95rem] text-leaf">
-              Add {inWords(barsToDiscount)} more{" "}
-              {barsToDiscount === 1 ? "bar" : "bars"} for {percent}% off your
-              soap.
-            </p>
-          )}
 
           {checkoutEnabled ? (
             <>

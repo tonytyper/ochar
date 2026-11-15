@@ -17,7 +17,7 @@ export default async function CartPage() {
 
   return (
     <>
-      <PageHeader eyebrow="The shop" title="Your cart" />
+      <PageHeader title="Your cart" />
       <section className="wrap pb-24 lg:pb-32">
         <CartView
           products={products}

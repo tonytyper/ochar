@@ -25,7 +25,7 @@ function Detail({ title, children }: { title: string; children: React.ReactNode 
 export default function ContactPage() {
   return (
     <>
-      <PageHeader eyebrow="Contact" title="Write to us.">
+      <PageHeader title="Write to us.">
         <p>
           About an order, a bar, or anything else. We read every message
           ourselves and usually reply within a couple of days.

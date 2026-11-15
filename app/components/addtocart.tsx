@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { cart } from "@/lib/cart";
+import { cart, drawer } from "@/lib/cart";
 import { formatPrice, MAX_QUANTITY, type SoapStatus } from "@/lib/site";
 import Quantity from "./quantity";
 
@@ -49,9 +49,10 @@ export default function AddToCart({
 
   function add() {
     cart.add(slug, quantity, max);
+    drawer.open();
     setAdded(true);
     clearTimeout(timer.current);
-    timer.current = setTimeout(() => setAdded(false), 5000);
+    timer.current = setTimeout(() => setAdded(false), 4000);
   }
 
   return (
@@ -80,15 +81,8 @@ export default function AddToCart({
           </span>
         </button>
       </div>
-      <p aria-live="polite" className="mt-3 min-h-[1.6em] text-[0.98rem] text-ink-soft">
-        {added && (
-          <>
-            In your cart.{" "}
-            <Link href="/cart" className="link text-primary">
-              View cart and check out
-            </Link>
-          </>
-        )}
+      <p aria-live="polite" className="sr-only">
+        {added ? "Added to your cart." : ""}
       </p>
     </div>
   );

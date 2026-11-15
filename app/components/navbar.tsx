@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useCartCount } from "@/lib/cart";
+import { drawer, useCartCount } from "@/lib/cart";
 import { discountLine, mainNav, secondaryNav, site } from "@/lib/site";
 
 function isCurrent(pathname: string, href: string) {
@@ -33,12 +33,19 @@ function NavLink({
   );
 }
 
-function CartLink({ onClick }: { onClick: () => void }) {
+function CartLink({ onClick, pathname }: { onClick: () => void; pathname: string }) {
   const count = useCartCount();
   return (
     <Link
       href="/cart"
-      onClick={onClick}
+      onClick={(event) => {
+        onClick();
+        // opens the drawer instead, except on the cart page itself
+        if (pathname !== "/cart") {
+          event.preventDefault();
+          drawer.open();
+        }
+      }}
       className="text-[0.8rem] uppercase tracking-[0.16em] text-ink-soft transition-colors hover:text-primary"
     >
       Cart
@@ -67,9 +74,12 @@ export default function Navbar() {
 
   return (
     <>
-      <p className="bg-primary px-4 py-2 text-center text-[0.74rem] uppercase tracking-[0.18em] text-parchment-50">
-        {discountLine()}
-      </p>
+      <Link
+        href="/shop"
+        className="block bg-primary px-4 py-2 text-center text-[0.74rem] uppercase tracking-[0.18em] text-parchment-50 transition-colors hover:bg-primary-hover"
+      >
+        {discountLine()}, any mix
+      </Link>
 
       <header className="paper sticky top-0 z-40 border-b border-line">
         <div className="wrap grid h-[4.6rem] grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-[5.4rem]">
@@ -107,7 +117,7 @@ export default function Navbar() {
               className="font-display text-[2.1rem] leading-none text-primary lg:text-[2.6rem]"
               onClick={() => setOpen(false)}
             >
-              ochar - օճառ
+              ochar
               <span className="sr-only"> soap, home</span>
             </Link>
             <p className="mt-1 text-[0.85rem] italic leading-none text-muted lg:mt-1.5 lg:text-[0.98rem]">
@@ -124,7 +134,7 @@ export default function Navbar() {
                 <NavLink key={link.href} {...link} pathname={pathname} />
               ))}
             </nav>
-            <CartLink onClick={() => setOpen(false)} />
+            <CartLink onClick={() => setOpen(false)} pathname={pathname} />
           </div>
         </div>
 

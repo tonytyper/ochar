@@ -51,7 +51,7 @@ const TIMELINE = [
 export default function AboutPage() {
   return (
     <>
-      <PageHeader eyebrow="Our story" title={`From ${site.family} to you.`} />
+      <PageHeader title={`From ${site.family} to you.`} />
 
       <section className="wrap grid gap-16 pb-24 lg:grid-cols-12 lg:gap-8 lg:pb-32">
         <div className="space-y-6 text-[1.25rem] leading-relaxed text-ink-soft lg:col-span-7">

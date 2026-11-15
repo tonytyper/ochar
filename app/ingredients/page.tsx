@@ -83,7 +83,7 @@ export default async function IngredientsPage() {
 
   return (
     <>
-      <PageHeader eyebrow="Ingredients" title="Everything that goes into a bar.">
+      <PageHeader title="Everything that goes into a bar.">
         <p>
           Here’s what we use and why. Each bar’s page lists its own
           ingredients in full, so you always know exactly what you’re

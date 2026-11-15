@@ -13,8 +13,8 @@ export const site = {
   location: "",
   // PLACEHOLDER: full instagram url, or leave empty to hide the link
   instagram: "",
-  // PLACEHOLDER: weigh a cured bar
-  barWeight: "4 oz",
+  // bars vary. this is about the average
+  barWeight: "120 g",
   cureWeeks: 6,
 
   currency: "usd",
@@ -34,16 +34,11 @@ export const site = {
     // two-letter country codes stripe will accept a shipping address for
     countries: ["US"],
     processingDays: "2 to 4 business days",
-    // how long after delivery a damaged or wrong order can be reported
+    // how long after delivery a wrong item can be reported. the only case
+    // that gets a refund or replacement: all other sales are final
     claimDays: 14,
-    // how long after delivery an unopened order can be sent back
-    returnDays: 30,
     transitDays: { min: 3, max: 7 },
   },
-
-  // a landscape photo for the top of the home page. a path in /public, a file
-  // in the supabase product-images bucket, or a full url. empty uses the label
-  heroImage: "/products/ocean-breeze-37-1.jpg",
 
   // shown at the top of the privacy and terms pages
   policiesUpdated: "October 2026",

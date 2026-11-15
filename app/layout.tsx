@@ -4,10 +4,16 @@ import {
   Fondamento,
   Noto_Serif_Armenian,
 } from "next/font/google";
+import CartDrawer from "@/app/components/cartdrawer";
 import Footer from "@/app/components/footer";
 import Navbar from "@/app/components/navbar";
+import { getProducts } from "@/lib/products";
 import { site, siteUrl } from "@/lib/site";
+import { checkoutEnabled } from "@/lib/stripe";
 import "./globals.css";
+
+// the cart drawer on every page shows current prices and stock
+export const revalidate = 300;
 
 // the face on the soap boxes, for the logo, headings and bar names
 const fondamento = Fondamento({
@@ -53,11 +59,13 @@ export const viewport: Viewport = {
   themeColor: "#f6f0e6",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const products = await getProducts();
+
   return (
     <html
       lang="en"
@@ -75,6 +83,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <CartDrawer products={products} checkoutEnabled={checkoutEnabled()} />
       </body>
     </html>
   );
