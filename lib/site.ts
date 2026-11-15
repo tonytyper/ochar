@@ -8,8 +8,7 @@ export const site = {
   motto: "Our goal is quality",
   description:
     "Homemade, all-natural soap from the Tonoyan family. Olive oil, shea butter and a six-week cure, cut and boxed by hand.",
-  // PLACEHOLDER: the domain is ocharsoap.co, as on the boxes. the inbox is a guess
-  email: "hello@ocharsoap.co",
+  email: "ocharsoap@gmail.com",
   // PLACEHOLDER: city and state, shown in the footer and on the contact page
   location: "",
   // PLACEHOLDER: full instagram url, or leave empty to hide the link
