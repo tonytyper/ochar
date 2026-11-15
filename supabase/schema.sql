@@ -25,10 +25,21 @@ create table if not exists public.products (
   created_at  timestamptz not null default now()
 );
 
--- for a table made by an earlier version of this file
+-- for a products table that was already there: adds whatever it's missing
 alter table public.products add column if not exists number integer;
+alter table public.products add column if not exists slug text;
+alter table public.products add column if not exists name text;
+alter table public.products add column if not exists description text;
+alter table public.products add column if not exists ingredients text[] not null default '{}';
+alter table public.products add column if not exists price numeric(8, 2);
+alter table public.products add column if not exists image_url text;
+alter table public.products add column if not exists gallery text[] not null default '{}';
+alter table public.products add column if not exists tone text;
 alter table public.products add column if not exists status text not null default 'for-sale';
 alter table public.products add column if not exists quantity integer;
+alter table public.products add column if not exists sort_order integer not null default 0;
+alter table public.products add column if not exists created_at timestamptz not null default now();
+create unique index if not exists products_slug_key on public.products (slug);
 
 alter table public.products enable row level security;
 
