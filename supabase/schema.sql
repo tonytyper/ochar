@@ -72,6 +72,53 @@ create table if not exists public.orders (
 
 alter table public.orders enable row level security;
 
+-- saves a paid order and takes the bars off the shelf, both or neither. a
+-- bar for sale that runs out moves to out-of-stock. stripe can send the same
+-- order twice, so stock is only taken the first time. returns false for a repeat
+create or replace function public.save_paid_order(
+  p_session  text,
+  p_email    text,
+  p_name     text,
+  p_shipping jsonb,
+  p_items    jsonb, -- [{ slug, name, quantity, amount }]
+  p_amount   integer,
+  p_currency text
+) returns boolean
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  item jsonb;
+  sold integer;
+begin
+  insert into orders (stripe_session_id, email, name, shipping, items, amount_total, currency, status)
+  values (p_session, p_email, p_name, p_shipping, p_items, p_amount, p_currency, 'paid')
+  on conflict (stripe_session_id) do nothing;
+
+  if not found then
+    return false;
+  end if;
+
+  for item in select * from jsonb_array_elements(p_items) loop
+    sold := coalesce((item ->> 'quantity')::integer, 0);
+    update products
+       set quantity = greatest(quantity - sold, 0),
+           status = case
+             when status = 'for-sale' and quantity - sold <= 0 then 'out-of-stock'
+             else status
+           end
+     where slug = item ->> 'slug'
+       and quantity is not null;
+  end loop;
+
+  return true;
+end;
+$$;
+
+revoke execute on function public.save_paid_order from public, anon, authenticated;
+grant execute on function public.save_paid_order to service_role;
+
 
 -- messages -----------------------------------------------------------------
 -- from the contact form. same as orders: secret key only

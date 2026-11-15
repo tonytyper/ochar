@@ -56,25 +56,25 @@ async function saveOrder(stripe: Stripe, session: Stripe.Checkout.Session) {
 
   const lineItems = await stripe.checkout.sessions.listLineItems(session.id, {
     limit: 100,
+    expand: ["data.price.product"],
   });
 
-  const { error } = await supabase.from("orders").upsert(
-    {
-      stripe_session_id: session.id,
-      email: session.customer_details?.email ?? null,
-      name: session.customer_details?.name ?? null,
-      shipping: session.collected_information?.shipping_details ?? null,
-      items: lineItems.data.map((item) => ({
-        name: item.description,
-        quantity: item.quantity,
-        amount: item.amount_total,
-      })),
-      amount_total: session.amount_total,
-      currency: session.currency,
-      status: "paid",
-    },
-    { onConflict: "stripe_session_id" },
-  );
+  // save_paid_order (supabase/schema.sql) saves the order and lowers the
+  // stock in one go, and only the first time stripe sends it
+  const { error } = await supabase.rpc("save_paid_order", {
+    p_session: session.id,
+    p_email: session.customer_details?.email ?? null,
+    p_name: session.customer_details?.name ?? null,
+    p_shipping: session.collected_information?.shipping_details ?? null,
+    p_items: lineItems.data.map((item) => ({
+      slug: (item.price?.product as Stripe.Product | undefined)?.metadata?.slug ?? null,
+      name: item.description,
+      quantity: item.quantity,
+      amount: item.amount_total,
+    })),
+    p_amount: session.amount_total,
+    p_currency: session.currency,
+  });
 
   if (error) {
     throw new Error(error.message);

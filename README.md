@@ -79,7 +79,8 @@ check the table now and then.
    `https://<your-site>/api/stripe/webhook`, listening for
    `checkout.session.completed` and `checkout.session.async_payment_succeeded`.
    Copy its signing secret into `STRIPE_WEBHOOK_SECRET`. Paid orders are then
-   saved to the Supabase `orders` table. (Locally:
+   saved to the Supabase `orders` table, and the bars sold come off each
+   soap's `quantity`. A soap that runs out moves to `out-of-stock`. (Locally:
    `stripe listen --forward-to localhost:3000/api/stripe/webhook`.)
 5. **Settings → Customer emails**: turn on receipts for successful payments.
    The thank-you page tells customers a receipt is coming.

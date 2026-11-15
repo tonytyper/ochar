@@ -36,6 +36,17 @@ export async function POST(request: NextRequest) {
     return fail("The shop couldn’t be reached. Please try again.", 502);
   }
 
+  const origin = process.env.NEXT_PUBLIC_SITE_URL
+    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
+    : request.nextUrl.origin;
+
+  // stripe only shows photos from a full https url
+  const imageUrl = (image: string | null) => {
+    if (!image) return undefined;
+    const url = image.startsWith("/") ? origin + image : image;
+    return url.startsWith("https://") ? [url] : undefined;
+  };
+
   const lineItems: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
   let subtotal = 0;
 
@@ -76,9 +87,7 @@ export async function POST(request: NextRequest) {
         product_data: {
           name: product.name,
           description: product.summary || undefined,
-          images: product.image?.startsWith("https://")
-            ? [product.image]
-            : undefined,
+          images: imageUrl(product.image),
           metadata: { slug: product.slug },
         },
       },
@@ -87,9 +96,6 @@ export async function POST(request: NextRequest) {
 
   const { shipping } = site;
   const free = shipping.freeOver > 0 && subtotal >= shipping.freeOver * 100;
-  const origin = process.env.NEXT_PUBLIC_SITE_URL
-    ? process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "")
-    : request.nextUrl.origin;
 
   try {
     const session = await stripe.checkout.sessions.create({
