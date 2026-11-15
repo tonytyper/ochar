@@ -41,6 +41,23 @@ alter table public.products add column if not exists sort_order integer not null
 alter table public.products add column if not exists created_at timestamptz not null default now();
 create unique index if not exists products_slug_key on public.products (slug);
 
+-- in_stock is worked out from status and quantity, so it can't be edited or go
+-- stale: true only for a bar that's for sale and not run out. an older table
+-- had a plain in_stock column, which gets replaced
+do $$
+begin
+  if exists (
+    select 1 from information_schema.columns
+    where table_schema = 'public' and table_name = 'products'
+      and column_name = 'in_stock' and is_generated = 'NEVER'
+  ) then
+    alter table public.products drop column in_stock;
+  end if;
+end
+$$;
+alter table public.products add column if not exists in_stock boolean
+  generated always as (status = 'for-sale' and coalesce(quantity, 1) > 0) stored;
+
 alter table public.products enable row level security;
 
 drop policy if exists "anyone can read products" on public.products;
