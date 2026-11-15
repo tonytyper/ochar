@@ -56,7 +56,7 @@ export default function ShippingReturnsPage() {
             Soap is a personal care product, so we can’t take back bars that have been opened or
             used. If you change your mind about an unopened order, write to us within{" "}
             {shipping.returnDays} days of delivery. Once it’s back with us in its original
-            wrapping, we’ll refund the cost of the soap. Return postage is yours to cover.
+            box, we’ll refund the cost of the soap. Return postage is yours to cover.
           </p>
 
           <h2>Lost parcels</h2>

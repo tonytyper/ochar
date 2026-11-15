@@ -15,7 +15,7 @@ const STEPS = [
   },
   {
     title: "Pour",
-    text: "The oils meet the lye, then the milks, clays and botanicals go in, and it all sets in wooden moulds.",
+    text: "The oils meet the lye, then the scent and colour go in, and the swirls are poured by hand into moulds.",
   },
   {
     title: "Cut",
@@ -23,24 +23,22 @@ const STEPS = [
   },
   {
     title: "Cure",
-    text: `${inWords(site.cureWeeks, true)} weeks on an open rack, until each bar is hard, mild and long-lasting. Then it’s bevelled and wrapped.`,
+    text: `${inWords(site.cureWeeks, true)} weeks on an open rack, until each bar is hard, mild and long-lasting. Then it’s trimmed and boxed.`,
   },
 ];
 
 const GOES_IN = [
-  "Olive, coconut and castor oils",
-  "Shea and cocoa butter",
-  "Oat milk, coconut milk, raw honey",
-  "Clays and sea salt",
-  "Essential oils and dried botanicals",
+  "Olive and coconut oil",
+  "Shea butter and castor oil",
+  "Vitamin E",
+  "Skin-safe micas for colour",
+  "A scent, named on every label",
 ];
 
 const STAYS_OUT = [
-  "Synthetic fragrance",
   "Palm oil",
   "Sulfates and detergents",
-  "Parabens and preservatives",
-  "Artificial colour",
+  "Parabens",
 ];
 
 export default async function Home() {
@@ -56,7 +54,7 @@ export default async function Home() {
       {/* the line of small facts under the hero */}
       <div className="border-y border-line">
         <ul className="wrap grid grid-cols-2 gap-y-3 py-5 text-center text-[0.78rem] uppercase tracking-[0.18em] text-ink-soft md:flex md:items-center md:justify-center md:gap-8">
-          {["Small batches", `Cured ${inWords(site.cureWeeks)} weeks`, "Cut by hand", "Wrapped in paper"].map(
+          {["Small batches", `Cured ${inWords(site.cureWeeks)} weeks`, "Cut by hand", "Boxed by hand"].map(
             (fact, i) => (
               <li key={fact} className="flex items-center justify-center gap-8">
                 {i > 0 && (
@@ -156,7 +154,7 @@ export default async function Home() {
             <p className="eyebrow">Ingredients</p>
             <h2 className="mt-3 text-section">Nothing you’d have to look up.</h2>
             <p className="mt-6 max-w-md text-ink-soft">
-              Every bar lists exactly what’s in it, down to the clay. If a word
+              Every bar lists exactly what’s in it, down to the colour. If a word
               on the label is unfamiliar, it’s on our ingredients page with a
               line about why it’s there.
             </p>
@@ -197,7 +195,7 @@ export default async function Home() {
         <Sprig className="h-28 w-12 text-primary" />
         <h2 className="mt-8 text-section">Small batches, gone quickly.</h2>
         <p className="mt-5 max-w-lg text-[1.2rem] text-ink-soft">
-          Each scent is made a few dozen bars at a time. When one sells out,
+          Each scent is made about ten bars at a time. When one sells out,
           it’s back after the next {inWords(site.cureWeeks)}-week cure.
         </p>
         <Rule className="mt-9 w-32 text-accent" />

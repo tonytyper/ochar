@@ -14,7 +14,7 @@ npm run dev
 ```
 
 Then open http://localhost:3000. Nothing needs setting up first: without any
-keys the shop runs on a stand-in catalogue, and the cart offers "order by
+keys the shop runs on the catalogue in `lib/products.ts`, and the cart offers "order by
 email" instead of card checkout.
 
 ## Where to change things
@@ -42,8 +42,9 @@ step 3 and take payments later.
 2. Open **SQL Editor**, paste in `supabase/schema.sql` and run it. This makes
    the `products`, `orders` and `messages` tables and the `product-images`
    photo bucket.
-3. Optional: run `supabase/seed.sql` to start from the stand-in catalogue, then
-   edit the rows in **Table Editor** into your real bars.
+3. Run `supabase/seed.sql` to load the ten soaps from the stock list, then
+   keep them up to date in **Table Editor**: change `status` (`for-sale`,
+   `curing`, `out-of-stock`) and `quantity` as batches sell and cure.
 4. Upload photos under **Storage → product-images**. Put the file name (for
    example `lavender-field.jpg`) in the bar's `image_url` column. Extra photos
    go in `gallery`.
@@ -53,7 +54,7 @@ step 3 and take payments later.
 > `.env.local` still points at the old Supabase project, which no longer
 > exists. Replace those two lines with the new project's values. Until you
 > do, every page waits a few seconds for the dead address before falling back
-> to the stand-in catalogue, and `npm run build` fails on purpose (see "How it
+> to the catalogue in the code, and `npm run build` fails on purpose (see "How it
 > fits together").
 
 **Photos.** Every bar is shown in a 4:3 landscape frame, cropped to fill. Use
@@ -118,9 +119,9 @@ redeploy needed.
 - **Pages** are server components. They call `getProducts()` from
   `lib/products.ts` directly and are rebuilt every five minutes.
 - **Products** come from Supabase when the table exists and has rows. If it
-  doesn't, the stand-in catalogue at the bottom of `lib/products.ts` is used.
+  doesn't, the catalogue at the bottom of `lib/products.ts` is used.
   If Supabase is set up but can't be reached, production pages keep their last
-  good version and checkout refuses, rather than quietly showing the stand-in
+  good version and checkout refuses, rather than quietly showing the in-code
   catalogue at made-up prices.
 - **The cart** lives in the browser's localStorage (`lib/cart.ts`). It only
   stores which bars and how many. Names and prices are always looked up fresh.

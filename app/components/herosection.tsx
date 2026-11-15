@@ -15,8 +15,8 @@ export default function HeroSection() {
           Soap, made slowly and by hand.
         </h1>
         <p className="mt-7 max-w-120 text-[1.3rem] leading-relaxed text-ink-soft animate-rise [animation-delay:180ms]">
-          Plant oils, real botanicals and a {inWords(site.cureWeeks)}-week cure. Every
-          bar is poured, cut and wrapped by our family, a few dozen at a time.
+          Olive oil, shea butter and a {inWords(site.cureWeeks)}-week cure. Every
+          bar is poured, cut and boxed by our family, about ten at a time.
         </p>
         <div className="mt-10 flex flex-wrap items-center gap-x-9 gap-y-5 animate-rise [animation-delay:270ms]">
           <Link href="/shop" className="btn btn-primary">

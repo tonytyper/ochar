@@ -94,18 +94,19 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
         q: "Why does my bar look a little different from the photo?",
         a: (
           <p>
-            Every bar is cut by hand and coloured only with clays, roots and
-            petals, so no two batches are identical. Small differences in size
-            and shade are part of it.
+            Every bar is cut by hand and every swirl is poured by hand, so no
+            two bars are identical. Small differences in size and pattern are
+            part of it.
           </p>
         ),
       },
       {
-        q: "Do you use fragrance oils or dyes?",
+        q: "What gives the soap its scent and colour?",
         a: (
           <p>
-            No. Scent comes only from essential oils and absolutes, and colour
-            from natural ingredients, or not at all.
+            Most bars are scented with a skin-safe fragrance and coloured with
+            micas, and each one is named on the label. If you’d rather avoid
+            both, Neem has no added scent or colour.
           </p>
         ),
       },
@@ -114,7 +115,7 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
         a: (
           <p>
             Every bar lists its ingredients in full, so you can check before
-            you buy. Anything made with honey or animal milk isn’t vegan;
+            you buy. Anything made with beeswax, honey or milk isn’t vegan;
             everything else is.
           </p>
         ),
@@ -157,7 +158,7 @@ const SECTIONS: { title: string; questions: { q: string; a: React.ReactNode }[] 
         q: "I have sensitive skin or allergies. Which bar should I choose?",
         a: (
           <p>
-            Start with an unscented bar, read the ingredients carefully, and
+            Start with Neem, which has no added scent or colour, and
             patch test before using it all over. If you’re unsure,{" "}
             <Link href="/contact">ask us</Link> and we’ll tell you exactly
             what’s in a batch.

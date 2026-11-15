@@ -8,7 +8,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Ingredients",
   description:
-    "Everything that goes into an ochar bar, and why. Plant oils, butters, clays, botanicals and essential oils.",
+    "Everything that goes into an ochar bar, and why. Oils, butters, colour and scent, all named on the label.",
 };
 
 // each entry shows only if some bar's ingredient list contains `match`. add an
@@ -19,58 +19,48 @@ const GLOSSARY = [
     intro: "Where every bar starts. The mix of oils decides how hard a bar is, and how it lathers.",
     entries: [
       { name: "Olive oil", match: "olive", text: "The base of every bar. Gentle and conditioning, and the reason the lather feels creamy rather than squeaky." },
-      { name: "Coconut oil", match: "coconut oil", text: "Gives the big, bubbly lather. Used in moderation, since too much can dry the skin." },
+      { name: "Coconut oil", match: "coconut oil", text: "Gives the big, bubbly lather." },
       { name: "Castor oil", match: "castor", text: "A small amount makes the lather denser and longer-lasting." },
-      { name: "Avocado oil", match: "avocado", text: "Rich and gentle, for a softer, more conditioning bar." },
       { name: "Shea butter", match: "shea", text: "Adds hardness and a soft, moisturising feel." },
-      { name: "Cocoa butter", match: "cocoa", text: "A firm butter for a long-lasting bar, with a faint note of chocolate." },
+      { name: "Neem seed oil", match: "neem", text: "Pressed from the seeds of the neem tree, with a strong, earthy character." },
+      { name: "Beeswax", match: "bees", text: "A little wax makes a harder bar that lasts longer." },
     ],
   },
   {
-    group: "Milks and honey",
-    intro: "Added at the end of the pour. Their natural sugars make the lather richer.",
+    group: "What makes it soap",
+    intro: "The few things that turn oils into a bar, and keep it fresh.",
     entries: [
-      { name: "Oat milk", match: "oat milk", text: "Soothing and mild, and kind to dry skin." },
-      { name: "Coconut milk", match: "coconut milk", text: "Adds creaminess and a silky feel to the lather." },
-      { name: "Raw honey", match: "honey", text: "Draws moisture to the skin and gives the lather a little extra lift." },
+      { name: "Lye", match: "lye", text: "Sodium hydroxide. It reacts with the oils and becomes soap and glycerin, and none is left once the bar has cured." },
+      { name: "Water", match: "water", text: "Carries the lye, then evaporates during the cure." },
+      { name: "Vitamin E", match: "vitamin e", text: "An antioxidant that helps keep the oils fresh." },
+      { name: "Sodium lactate", match: "sodium lactate", text: "A salt made from lactic acid. It gives a harder bar that comes out of the mould cleanly." },
+      { name: "Aloe vera juice", match: "aloe", text: "Used in place of some of the water." },
+      { name: "Glycerin", match: "glycerin", text: "Draws moisture to the skin." },
+      { name: "Sugar", match: "sugar", text: "A pinch boosts the lather." },
     ],
   },
   {
-    group: "Clays, salt and oats",
-    intro: "For texture, slip and a little extra cleansing.",
+    group: "Colour",
+    intro: "All the swirls, stripes and hearts are poured by hand.",
     entries: [
-      { name: "Kaolin clay", match: "kaolin", text: "The gentlest clay, in white or blue. Adds slip and a soft, silky finish." },
-      { name: "French green clay", match: "green clay", text: "A more absorbent clay, good for oily skin." },
-      { name: "Sea salt", match: "sea salt", text: "Makes a hard, mineral bar with a fine, close lather." },
-      { name: "Colloidal oatmeal", match: "colloidal", text: "Oats ground to a fine powder, to calm dry or itchy skin." },
-    ],
-  },
-  {
-    group: "Botanicals",
-    intro: "Dried flowers and roots, for colour and a little texture.",
-    entries: [
-      { name: "Lavender buds", match: "lavender bud", text: "Whole dried buds, pressed into the top of the bar." },
-      { name: "Calendula petals", match: "calendula", text: "Bright marigold petals that keep their colour through the cure." },
-      { name: "Orris root", match: "orris", text: "The dried root of the iris, with a soft, powdery scent." },
-      { name: "Alkanet root", match: "alkanet", text: "A root that colours a bar naturally, from mauve to deep purple." },
+      { name: "Mica", match: "mica", text: "Fine mineral powder in skin-safe colours. Each shade is named on the label, like fruit green or lemon yellow." },
+      { name: "Titanium dioxide", match: "titanium", text: "A white mineral pigment, for the brightest white parts of a bar." },
+      { name: "Activated charcoal", match: "charcoal", text: "For the deep black swirls." },
     ],
   },
   {
     group: "Scent",
-    intro: "The only fragrance we use comes from plants.",
+    intro: "Every scent is named on the label. Neem has none at all.",
     entries: [
-      { name: "Essential oils", match: "essential oil", text: "Distilled or pressed from leaves, peel, needles and flowers. Each one is named on the bar’s page." },
-      { name: "Absolutes", match: "absolute", text: "Some flowers, like jasmine and tuberose, are too delicate to distil, so their scent is drawn out gently instead." },
+      { name: "Fragrance", match: "scent", text: "A skin-safe fragrance oil, added at the end of the pour. The name on the box, like Ocean Breeze or Sweet Tobacco, is the scent." },
     ],
   },
 ];
 
 const LEFT_OUT = [
-  ["Synthetic fragrance", "No fragrance oils. Every scent is an essential oil or absolute."],
   ["Palm oil", "Not in any bar, in any form."],
   ["Sulfates and detergents", "Real soap cleans on its own. There’s nothing to add."],
-  ["Parabens and preservatives", "A cured bar of soap doesn’t need them."],
-  ["Artificial colour", "Colour comes from clays, roots and petals, or not at all."],
+  ["Parabens", "A cured bar of soap doesn’t need them."],
 ];
 
 function barsWith(products: Product[], match: string) {
@@ -178,9 +168,9 @@ export default async function IngredientsPage() {
         <div className="max-w-2xl">
           <h2 className="text-[2rem] leading-tight">Sensitive skin or allergies?</h2>
           <p className="mt-4 text-ink-soft">
-            Natural isn’t the same as gentle for everyone. Essential oils can
-            irritate skin that reacts easily, so check each bar’s ingredients,
-            try a little on your inner arm first, and{" "}
+            Natural isn’t the same as gentle for everyone. Fragrance can irritate skin that
+            reacts easily. Neem has no added scent or colour, so it’s the gentlest
+            place to start. Try a little on your inner arm first, and{" "}
             <Link href="/contact" className="link text-ink">
               ask us
             </Link>{" "}

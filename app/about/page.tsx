@@ -21,7 +21,7 @@ const VALUES = [
   },
   {
     title: "Made by us",
-    text: "Nobody else makes our soap. Every batch is mixed, poured, cut and wrapped by one of the family.",
+    text: "Nobody else makes our soap. Every batch is mixed, poured, cut and boxed by one of the family.",
   },
 ];
 
@@ -29,7 +29,7 @@ const TIMELINE = [
   {
     when: "Day one",
     title: "Weigh and pour",
-    text: "Oils and butters are weighed to the gram, warmed, and brought together with lye. Milks, clays and botanicals go in last, then the batch is poured into wooden moulds and wrapped up warm.",
+    text: "Oils and butters are weighed to the gram, warmed, and brought together with lye. Scent and colour go in last, then the swirls are poured by hand into moulds and left to set.",
   },
   {
     when: "Day two",
@@ -43,8 +43,8 @@ const TIMELINE = [
   },
   {
     when: "After that",
-    title: "Bevel and wrap",
-    text: "Edges are smoothed, each bar is checked, and it’s wrapped in its label, ready for the shop.",
+    title: "Trim and box",
+    text: "Edges are smoothed, each bar is checked, and it goes into its box, ready for the shop.",
   },
 ];
 
